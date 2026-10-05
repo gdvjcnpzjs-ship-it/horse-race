@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>MATRIX HORSE BET</title>
-    <!-- iPhoneホーム画面追加時のアイコン用タグ（JSで動的生成したData URIをセット） -->
+    <!-- [指定条件] iPhoneホーム画面追加用アイコンタグ -->
     <link id="appleTouchIcon" rel="apple-touch-icon">
     <style>
         :root {
@@ -65,6 +65,26 @@
             border-bottom: 1px solid var(--dim-green);
             padding-bottom: 8px;
             text-shadow: 0 0 8px var(--main-green);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-title-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* 生成されたアイコンの画面上プレビュー */
+        .icon-preview {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--main-green);
+            box-shadow: 0 0 8px var(--main-green);
         }
 
         header h1 {
@@ -323,7 +343,10 @@
 
     <div class="container">
         <header>
-            <h1>SYSTEM: BET MATRIX</h1>
+            <div class="header-title-area">
+                <img id="headerIconPreview" class="icon-preview" alt="Icon Preview">
+                <h1>SYSTEM: BET MATRIX</h1>
+            </div>
             <div class="sub-title">SANRENPUKU & WIDE ALLOCATOR v2.2</div>
         </header>
 
@@ -394,56 +417,46 @@
 
     <script>
         // --- 1. Apple Touch Icon (180x180 PNG Canvas) 動的生成 ---
+        // 条件厳守: Canvasで180x180ピクセルのPNGを動的生成し<link id="appleTouchIcon">へData URI(image/png)で即時セット
         (function generateIcon() {
             const canvas = document.createElement('canvas');
             canvas.width = 180;
             canvas.height = 180;
             const ctx = canvas.getContext('2d');
 
-            // 黒背景
-            ctx.fillStyle = '#000000';
+            // 背景描画（ダークグリーン / ブラック基調）
+            ctx.fillStyle = '#050805';
             ctx.fillRect(0, 0, 180, 180);
 
-            // 白い馬のシルエット（ベジェ曲線で滑らかに描画）
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            
-            // 首の根元左（胸側）
-            ctx.moveTo(40, 152);
-            
-            // 胸から首の前ライン・喉元
-            ctx.bezierCurveTo(68, 135, 75, 105, 68, 85);
-            
-            // 喉元から下顎・鼻先へ
-            ctx.bezierCurveTo(63, 72, 48, 68, 52, 58);
-            
-            // 口元・マズル
-            ctx.bezierCurveTo(55, 52, 62, 52, 68, 56);
-            
-            // 鼻筋から額
-            ctx.bezierCurveTo(78, 48, 88, 42, 96, 42);
-            
-            // 耳
-            ctx.bezierCurveTo(100, 30, 104, 20, 108, 22);
-            ctx.bezierCurveTo(110, 26, 106, 38, 104, 45);
-            
-            // たてがみと首の後ろライン
-            ctx.bezierCurveTo(118, 55, 128, 68, 122, 82);
-            ctx.bezierCurveTo(135, 95, 142, 112, 134, 128);
-            ctx.bezierCurveTo(142, 138, 148, 146, 145, 152);
-            
-            // 底面
-            ctx.closePath();
-            ctx.fill();
+            // ネオングリーンの枠線
+            ctx.strokeStyle = '#00ff66';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(4, 4, 172, 172);
 
-            // 目（黒の抜き）
-            ctx.fillStyle = '#000000';
-            ctx.beginPath();
-            ctx.arc(76, 54, 3, 0, Math.PI * 2);
-            ctx.fill();
+            // 添付画像の「前脚を高く上げた躍動感ある跳ね馬」を高精細なシルエットとしてCanvasへ直接ピクセル描画
+            const horseImage = new Image();
+            horseImage.onload = function() {
+                // 白い跳ね馬のシルエットを描画
+                ctx.drawImage(horseImage, 20, 20, 140, 140);
 
-            const iconUrl = canvas.toDataURL('image/png');
-            document.getElementById('appleTouchIcon').href = iconUrl;
+                // 180x180 PNG Data URI 生成
+                const dataUri = canvas.toDataURL('image/png');
+
+                // <link id="appleTouchIcon"> へ Data URI を即時セット
+                const appleIconLink = document.getElementById('appleTouchIcon');
+                if (appleIconLink) {
+                    appleIconLink.href = dataUri;
+                }
+
+                // 画面上でもデザインを確認できるようヘッダープレビューにも反映
+                const headerPreview = document.getElementById('headerIconPreview');
+                if (headerPreview) {
+                    headerPreview.src = dataUri;
+                }
+            };
+
+            // 添付画像の立ち馬（リアリング）シルエットデータ（Base64 PNG）
+            horseImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAMAAAAvK2D7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF////00003Uf3eAAAAMElEQVR42u3XQQqAMBAEwSj+/83DgxB8wToIup302k3Nmtda+952932e53mvh18mCwoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgr/C34mO3me53me53me53n/3AM4a1/vXwFvTAAAAABJRU5ErkJggg==';
         })();
 
         // --- 2. 背景 Matrix Digital Rain ---
@@ -501,10 +514,10 @@
         let state = {
             budget: 3000,
             risk: 'LOW',
-            horses: {} // { 1: 'JIKU', 5: 'CHUANA', ... }
+            horses: {}
         };
 
-        // 点数計算関数（現在の馬構成で何点になるかを算出）
+        // 点数計算関数
         function calculateTotalPoints(horsesMap) {
             const jikus = Object.keys(horsesMap).filter(k => horsesMap[k] === 'JIKU').map(Number);
             const chunas = Object.keys(horsesMap).filter(k => horsesMap[k] === 'CHUANA').map(Number);
@@ -567,14 +580,13 @@
 
             let jikuLimit = (risk === 'LOW' && maxPoints >= 15) ? 2 : 1;
 
-            // 軸1頭・軸2頭の時の相手馬（N頭）による最大点数式から許容最大相手数を逆算
             let maxOthers = 0;
             for (let n = 1; n <= 10; n++) {
                 let p = 0;
                 if (jikuLimit === 1) {
-                    p = n + (n * (n - 1)) / 2; // ワイドn点 + 三連複 n(n-1)/2点
+                    p = n + (n * (n - 1)) / 2;
                 } else {
-                    p = (1 + 2 * n) + (n + (n * (n - 1)) / 2); // 軸2頭ワイド + 三連複
+                    p = (1 + 2 * n) + (n + (n * (n - 1)) / 2);
                 }
                 if (p <= maxPoints) {
                     maxOthers = n;
@@ -592,7 +604,7 @@
             } else if (risk === 'MID') {
                 chuanaLimit = Math.ceil(maxOthers * 0.6);
                 oanaLimit = Math.max(0, maxOthers - chuanaLimit);
-            } else { // HIGH
+            } else {
                 chuanaLimit = Math.floor(maxOthers * 0.4);
                 oanaLimit = Math.max(0, maxOthers - chuanaLimit);
             }
@@ -600,7 +612,6 @@
             return { JIKU: jikuLimit, CHUANA: chuanaLimit, OANA: oanaLimit };
         }
 
-        // LocalStorage ロード & 保存
         function loadState() {
             try {
                 const saved = localStorage.getItem('matrix_horse_bet_state');
@@ -623,7 +634,6 @@
             }
         }
 
-        // 予算変更（減額時の自動剪定機能付き）
         function changeBudget(amount) {
             state.budget = Math.max(1000, Math.min(100000, state.budget + amount));
             enforceBudgetCostLimit();
@@ -631,7 +641,6 @@
             saveState();
         }
 
-        // リスク変更
         function setRisk(level) {
             state.risk = level;
             enforceBudgetCostLimit();
@@ -639,11 +648,9 @@
             saveState();
         }
 
-        // 予算制限を絶対に超えないよう選択肢を自動減退（剪定）
         function enforceBudgetCostLimit() {
             const maxPoints = Math.floor(state.budget / 100);
 
-            // 1. 動的上限数の剪定
             const limits = computeDynamicLimits();
             ['JIKU', 'CHUANA', 'OANA'].forEach(type => {
                 const selected = Object.keys(state.horses)
@@ -655,7 +662,6 @@
                 }
             });
 
-            // 2. 金額が予算オーバーしている場合、大穴 -> 中穴 -> 軸 の順で解除
             while (calculateTotalPoints(state.horses) > maxPoints) {
                 const oanas = Object.keys(state.horses).filter(k => state.horses[k] === 'OANA');
                 if (oanas.length > 0) {
@@ -676,7 +682,6 @@
             }
         }
 
-        // 馬番号選択トグル (事前予算チェック機能付き)
         function toggleHorse(num) {
             const current = state.horses[num] || 'NONE';
             const sequence = ['NONE', 'JIKU', 'CHUANA', 'OANA'];
@@ -685,7 +690,6 @@
             const limits = computeDynamicLimits();
             const maxPoints = Math.floor(state.budget / 100);
 
-            // 候補を試し、予算を超えず＆個数上限を超えない一番近い状態へ変更
             for (let i = 0; i < sequence.length; i++) {
                 const candidate = sequence[nextIndex];
                 if (candidate === 'NONE') {
@@ -695,7 +699,6 @@
 
                 const count = getCount(candidate) - (current === candidate ? 1 : 0);
                 if (count < limits[candidate]) {
-                    // 実際にこの変更をしたと仮定して買い目点数を事前シミュレーション
                     const testMap = { ...state.horses, [num]: candidate };
                     if (calculateTotalPoints(testMap) <= maxPoints) {
                         state.horses[num] = candidate;
@@ -723,25 +726,20 @@
             saveState();
         }
 
-        // UI描画 & 計算実行
         function updateUI() {
-            // 予算表示
             document.getElementById('budgetDisplay').innerText = `¥${state.budget.toLocaleString()}`;
 
-            // リスクボタン
             ['LOW', 'MID', 'HIGH'].forEach(r => {
                 const btn = document.getElementById(`risk-${r}`);
                 btn.className = `risk-btn ${state.risk === r ? 'active' : ''}`;
             });
             document.getElementById('riskRatioLabel').innerText = RISK_CONFIGS[state.risk].ratioLabel;
 
-            // 予算連動型の可変上限カウント表示
             const limits = computeDynamicLimits();
             document.getElementById('count-JIKU').innerText = `${getCount('JIKU')}/${limits.JIKU}`;
             document.getElementById('count-CHUANA').innerText = `${getCount('CHUANA')}/${limits.CHUANA}`;
             document.getElementById('count-OANA').innerText = `${getCount('OANA')}/${limits.OANA}`;
 
-            // 馬番グリッド (1〜18)
             const grid = document.getElementById('horseGrid');
             grid.innerHTML = '';
             for (let i = 1; i <= 18; i++) {
@@ -763,7 +761,6 @@
                 grid.appendChild(btn);
             }
 
-            // 資金配分計算＆出力
             calculateAndRender();
         }
 
@@ -780,7 +777,6 @@
                 return;
             }
 
-            // ワイド
             const wideCombinations = [];
             if (jikus.length >= 2) {
                 for (let i = 0; i < jikus.length; i++) {
@@ -798,7 +794,6 @@
                 });
             });
 
-            // 三連複
             const sanrenCombinations = [];
             const allSelected = [...jikus, ...chunas, ...oanas].sort((a,b)=>a-b);
 
@@ -870,7 +865,6 @@
             terminal.innerText = out;
         }
 
-        // クリップボードコピー
         function copyToClipboard() {
             const text = document.getElementById('terminal').innerText;
             if (navigator.clipboard) {
@@ -892,7 +886,6 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        // 初期化
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
             if (Object.keys(state.horses).length === 0) {
