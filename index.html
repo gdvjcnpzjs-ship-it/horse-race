@@ -182,3 +182,714 @@
         .limit-item {
             display: flex;
             align-items: center;
+            gap: 4px;
+        }
+
+        .tag-jiku { color: var(--jiku-color); font-weight: bold; }
+        .tag-chuana { color: var(--chuana-color); font-weight: bold; }
+        .tag-oana { color: var(--oana-color); font-weight: bold; }
+
+        /* 馬番トグルグリッド */
+        .horse-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .horse-btn {
+            aspect-ratio: 1;
+            background: #000;
+            border: 1px solid var(--dim-green);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .horse-num {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .horse-badge {
+            font-size: 0.6rem;
+            font-weight: bold;
+            line-height: 1;
+            margin-top: 2px;
+        }
+
+        .horse-btn[data-type="JIKU"] {
+            border-color: var(--jiku-color);
+            background: rgba(255, 51, 102, 0.2);
+            box-shadow: 0 0 6px var(--jiku-color);
+        }
+        .horse-btn[data-type="JIKU"] .horse-num,
+        .horse-btn[data-type="JIKU"] .horse-badge { color: var(--jiku-color); }
+
+        .horse-btn[data-type="CHUANA"] {
+            border-color: var(--chuana-color);
+            background: rgba(255, 170, 0, 0.2);
+            box-shadow: 0 0 6px var(--chuana-color);
+        }
+        .horse-btn[data-type="CHUANA"] .horse-num,
+        .horse-btn[data-type="CHUANA"] .horse-badge { color: var(--chuana-color); }
+
+        .horse-btn[data-type="OANA"] {
+            border-color: var(--oana-color);
+            background: rgba(0, 204, 255, 0.2);
+            box-shadow: 0 0 6px var(--oana-color);
+        }
+        .horse-btn[data-type="OANA"] .horse-num,
+        .horse-btn[data-type="OANA"] .horse-badge { color: var(--oana-color); }
+
+        /* ターミナル出力 */
+        .terminal {
+            background: #000;
+            border: 1px solid var(--main-green);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            max-height: 280px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            box-shadow: inset 0 0 8px rgba(0, 255, 102, 0.2);
+            font-family: 'Courier New', monospace;
+        }
+
+        .action-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-act {
+            background: var(--dark-green);
+            border: 1px solid var(--main-green);
+            color: var(--main-green);
+            padding: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-act:active {
+            background: var(--main-green);
+            color: #000;
+        }
+
+        .btn-reset {
+            border-color: #ff3366;
+            color: #ff3366;
+            background: rgba(255, 51, 102, 0.1);
+        }
+        .btn-reset:active {
+            background: #ff3366;
+            color: #000;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--main-green);
+            color: #000;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 10px var(--main-green);
+        }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="container">
+        <header>
+            <h1>SYSTEM: BET MATRIX</h1>
+            <div class="sub-title">SANRENPUKU & WIDE ALLOCATOR v2.2</div>
+        </header>
+
+        <!-- [1] 予算設定 -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>[1] TOTAL BUDGET</span>
+                <span style="font-size:0.65rem; color:var(--dim-green);">100円単位（絶対不越）</span>
+            </div>
+            <div class="budget-controls">
+                <button class="btn-step" onclick="changeBudget(-1000)">-1k</button>
+                <button class="btn-step" onclick="changeBudget(-100)">-</button>
+                <div class="budget-display" id="budgetDisplay">¥3,000</div>
+                <button class="btn-step" onclick="changeBudget(100)">+</button>
+                <button class="btn-step" onclick="changeBudget(1000)">+1k</button>
+            </div>
+        </div>
+
+        <!-- [2] リスク設定 -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>[2] RISK LEVEL</span>
+                <span style="font-size:0.65rem; color:var(--dim-green);" id="riskRatioLabel">ワイド 70% : 三連複 30%</span>
+            </div>
+            <div class="risk-options">
+                <div class="risk-btn active" id="risk-LOW" onclick="setRisk('LOW')">堅実<br>(LOW)</div>
+                <div class="risk-btn" id="risk-MID" onclick="setRisk('MID')">バランス<br>(MID)</div>
+                <div class="risk-btn" id="risk-HIGH" onclick="setRisk('HIGH')">挑戦<br>(HIGH)</div>
+            </div>
+
+            <div class="limits-info">
+                <div class="limit-item">
+                    <span class="tag-jiku">●軸</span>
+                    <span id="count-JIKU">0/2</span>
+                </div>
+                <div class="limit-item">
+                    <span class="tag-chuana">▲中</span>
+                    <span id="count-CHUANA">0/2</span>
+                </div>
+                <div class="limit-item">
+                    <span class="tag-oana">★大</span>
+                    <span id="count-OANA">0/1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- [3] 馬番選択 -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>[3] SELECT HORSES</span>
+                <span style="font-size:0.65rem; color:var(--dim-green);">1タップで状態切り替え</span>
+            </div>
+            <div class="horse-grid" id="horseGrid"></div>
+        </div>
+
+        <!-- [4] ターミナル出力 -->
+        <div class="panel">
+            <div class="panel-title">[4] OUTPUT TERMINAL</div>
+            <div class="terminal" id="terminal">Initializing system...</div>
+            <div class="action-btns">
+                <button class="btn-act btn-reset" onclick="resetSelections()">リセット</button>
+                <button class="btn-act" onclick="copyToClipboard()">コピー</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">クリップボードにコピーしました</div>
+
+    <script>
+        // --- 1. Apple Touch Icon (180x180 PNG Canvas) 動的生成 ---
+        (function generateIcon() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 180;
+            canvas.height = 180;
+            const ctx = canvas.getContext('2d');
+
+            // 黒背景
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, 180, 180);
+
+            // 白い馬のシルエット
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(40, 150);
+            ctx.lineTo(140, 150);
+            ctx.lineTo(130, 135);
+            ctx.lineTo(115, 130);
+            ctx.lineTo(120, 100);
+            ctx.lineTo(135, 75);
+            ctx.lineTo(120, 40);
+            ctx.lineTo(95, 30);
+            ctx.lineTo(75, 40);
+            ctx.lineTo(55, 60);
+            ctx.lineTo(45, 85);
+            ctx.lineTo(65, 80);
+            ctx.lineTo(85, 75);
+            ctx.lineTo(60, 105);
+            ctx.lineTo(50, 130);
+            ctx.closePath();
+            ctx.fill();
+
+            // 目 (黒)
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(95, 52, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            const iconUrl = canvas.toDataURL('image/png');
+            document.getElementById('appleTouchIcon').href = iconUrl;
+        })();
+
+        // --- 2. 背景 Matrix Digital Rain ---
+        const bgCanvas = document.getElementById('bg-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let width = bgCanvas.width = window.innerWidth;
+        let height = bgCanvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = bgCanvas.width = window.innerWidth;
+            height = bgCanvas.height = window.innerHeight;
+        });
+
+        const chars = '0123456789ABCDEF★▲●';
+        const fontSize = 14;
+        const columns = Math.floor(width / fontSize) + 1;
+        const drops = Array(columns).fill(1);
+
+        function drawMatrix() {
+            bgCtx.fillStyle = 'rgba(5, 8, 5, 0.1)';
+            bgCtx.fillRect(0, 0, width, height);
+            bgCtx.fillStyle = '#00ff66';
+            bgCtx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                bgCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 40);
+
+        // --- 3. アプリケーション状態 & 構成 ---
+        const RISK_CONFIGS = {
+            LOW: {
+                name: '堅実 (LOW)',
+                ratioLabel: 'ワイド重視',
+                baseJiku: 2,
+            },
+            MID: {
+                name: 'バランス (MID)',
+                ratioLabel: 'バランス配分',
+                baseJiku: 1,
+            },
+            HIGH: {
+                name: '挑戦 (HIGH)',
+                ratioLabel: '三連複重視',
+                baseJiku: 1,
+            }
+        };
+
+        let state = {
+            budget: 3000,
+            risk: 'LOW',
+            horses: {} // { 1: 'JIKU', 5: 'CHUANA', ... }
+        };
+
+        // 点数計算関数（現在の馬構成で何点になるかを算出）
+        function calculateTotalPoints(horsesMap) {
+            const jikus = Object.keys(horsesMap).filter(k => horsesMap[k] === 'JIKU').map(Number);
+            const chunas = Object.keys(horsesMap).filter(k => horsesMap[k] === 'CHUANA').map(Number);
+            const oanas = Object.keys(horsesMap).filter(k => horsesMap[k] === 'OANA').map(Number);
+            const others = [...chunas, ...oanas];
+
+            if (jikus.length === 0) return 0;
+
+            // ワイド
+            const wideCombinations = [];
+            if (jikus.length >= 2) {
+                for (let i = 0; i < jikus.length; i++) {
+                    for (let j = i + 1; j < jikus.length; j++) {
+                        wideCombinations.push([jikus[i], jikus[j]]);
+                    }
+                }
+            }
+            jikus.forEach(j => {
+                others.forEach(o => {
+                    const combo = [j, o].sort((a,b)=>a-b);
+                    if (!wideCombinations.some(c => c[0] === combo[0] && c[1] === combo[1])) {
+                        wideCombinations.push(combo);
+                    }
+                });
+            });
+
+            // 三連複
+            const sanrenCombinations = [];
+            const allSelected = [...jikus, ...chunas, ...oanas].sort((a,b)=>a-b);
+
+            if (jikus.length === 1) {
+                const jiku = jikus[0];
+                for (let i = 0; i < others.length; i++) {
+                    for (let j = i + 1; j < others.length; j++) {
+                        sanrenCombinations.push([jiku, others[i], others[j]]);
+                    }
+                }
+            } else if (jikus.length >= 2) {
+                if (allSelected.length >= 3) {
+                    for (let i = 0; i < allSelected.length; i++) {
+                        for (let j = i + 1; j < allSelected.length; j++) {
+                            for (let k = j + 1; k < allSelected.length; k++) {
+                                const combo = [allSelected[i], allSelected[j], allSelected[k]];
+                                if (combo.some(h => jikus.includes(h))) {
+                                    sanrenCombinations.push(combo);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return wideCombinations.length + sanrenCombinations.length;
+        }
+
+        // 予算とリスクに応じた「最大可能頭数上限」を動的算出
+        function computeDynamicLimits() {
+            const maxPoints = Math.floor(state.budget / 100);
+            const risk = state.risk;
+
+            let jikuLimit = (risk === 'LOW' && maxPoints >= 15) ? 2 : 1;
+
+            // 軸1頭・軸2頭の時の相手馬（N頭）による最大点数式から許容最大相手数を逆算
+            let maxOthers = 0;
+            for (let n = 1; n <= 10; n++) {
+                let p = 0;
+                if (jikuLimit === 1) {
+                    p = n + (n * (n - 1)) / 2; // ワイドn点 + 三連複 n(n-1)/2点
+                } else {
+                    p = (1 + 2 * n) + (n + (n * (n - 1)) / 2); // 軸2頭ワイド + 三連複
+                }
+                if (p <= maxPoints) {
+                    maxOthers = n;
+                } else {
+                    break;
+                }
+            }
+
+            let chuanaLimit = 0;
+            let oanaLimit = 0;
+
+            if (risk === 'LOW') {
+                chuanaLimit = Math.ceil(maxOthers * 0.7);
+                oanaLimit = Math.max(0, maxOthers - chuanaLimit);
+            } else if (risk === 'MID') {
+                chuanaLimit = Math.ceil(maxOthers * 0.6);
+                oanaLimit = Math.max(0, maxOthers - chuanaLimit);
+            } else { // HIGH
+                chuanaLimit = Math.floor(maxOthers * 0.4);
+                oanaLimit = Math.max(0, maxOthers - chuanaLimit);
+            }
+
+            return { JIKU: jikuLimit, CHUANA: chuanaLimit, OANA: oanaLimit };
+        }
+
+        // LocalStorage ロード & 保存
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('matrix_horse_bet_state');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.budget = parsed.budget || 3000;
+                    state.risk = parsed.risk || 'LOW';
+                    state.horses = parsed.horses || {};
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('matrix_horse_bet_state', JSON.stringify(state));
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // 予算変更（減額時の自動剪定機能付き）
+        function changeBudget(amount) {
+            state.budget = Math.max(1000, Math.min(100000, state.budget + amount));
+            enforceBudgetCostLimit();
+            updateUI();
+            saveState();
+        }
+
+        // リスク変更
+        function setRisk(level) {
+            state.risk = level;
+            enforceBudgetCostLimit();
+            updateUI();
+            saveState();
+        }
+
+        // 予算制限を絶対に超えないよう選択肢を自動減退（剪定）
+        function enforceBudgetCostLimit() {
+            const maxPoints = Math.floor(state.budget / 100);
+
+            // 1. 動的上限数の剪定
+            const limits = computeDynamicLimits();
+            ['JIKU', 'CHUANA', 'OANA'].forEach(type => {
+                const selected = Object.keys(state.horses)
+                    .filter(k => state.horses[k] === type)
+                    .map(Number);
+                while (selected.length > limits[type]) {
+                    const removeNum = selected.pop();
+                    delete state.horses[removeNum];
+                }
+            });
+
+            // 2. 金額が予算オーバーしている場合、大穴 -> 中穴 -> 軸 の順で解除
+            while (calculateTotalPoints(state.horses) > maxPoints) {
+                const oanas = Object.keys(state.horses).filter(k => state.horses[k] === 'OANA');
+                if (oanas.length > 0) {
+                    delete state.horses[oanas[oanas.length - 1]];
+                    continue;
+                }
+                const chunas = Object.keys(state.horses).filter(k => state.horses[k] === 'CHUANA');
+                if (chunas.length > 0) {
+                    delete state.horses[chunas[chunas.length - 1]];
+                    continue;
+                }
+                const jikus = Object.keys(state.horses).filter(k => state.horses[k] === 'JIKU');
+                if (jikus.length > 0) {
+                    delete state.horses[jikus[jikus.length - 1]];
+                    continue;
+                }
+                break;
+            }
+        }
+
+        // 馬番号選択トグル (事前予算チェック機能付き)
+        function toggleHorse(num) {
+            const current = state.horses[num] || 'NONE';
+            const sequence = ['NONE', 'JIKU', 'CHUANA', 'OANA'];
+            let nextIndex = (sequence.indexOf(current) + 1) % sequence.length;
+
+            const limits = computeDynamicLimits();
+            const maxPoints = Math.floor(state.budget / 100);
+
+            // 候補を試し、予算を超えず＆個数上限を超えない一番近い状態へ変更
+            for (let i = 0; i < sequence.length; i++) {
+                const candidate = sequence[nextIndex];
+                if (candidate === 'NONE') {
+                    delete state.horses[num];
+                    break;
+                }
+
+                const count = getCount(candidate) - (current === candidate ? 1 : 0);
+                if (count < limits[candidate]) {
+                    // 実際にこの変更をしたと仮定して買い目点数を事前シミュレーション
+                    const testMap = { ...state.horses, [num]: candidate };
+                    if (calculateTotalPoints(testMap) <= maxPoints) {
+                        state.horses[num] = candidate;
+                        break;
+                    }
+                }
+                nextIndex = (nextIndex + 1) % sequence.length;
+            }
+
+            if (state.horses[num] === 'NONE') {
+                delete state.horses[num];
+            }
+
+            updateUI();
+            saveState();
+        }
+
+        function getCount(type) {
+            return Object.values(state.horses).filter(v => v === type).length;
+        }
+
+        function resetSelections() {
+            state.horses = {};
+            updateUI();
+            saveState();
+        }
+
+        // UI描画 & 計算実行
+        function updateUI() {
+            // 予算表示
+            document.getElementById('budgetDisplay').innerText = `¥${state.budget.toLocaleString()}`;
+
+            // リスクボタン
+            ['LOW', 'MID', 'HIGH'].forEach(r => {
+                const btn = document.getElementById(`risk-${r}`);
+                btn.className = `risk-btn ${state.risk === r ? 'active' : ''}`;
+            });
+            document.getElementById('riskRatioLabel').innerText = RISK_CONFIGS[state.risk].ratioLabel;
+
+            // 予算連動型の可変上限カウント表示
+            const limits = computeDynamicLimits();
+            document.getElementById('count-JIKU').innerText = `${getCount('JIKU')}/${limits.JIKU}`;
+            document.getElementById('count-CHUANA').innerText = `${getCount('CHUANA')}/${limits.CHUANA}`;
+            document.getElementById('count-OANA').innerText = `${getCount('OANA')}/${limits.OANA}`;
+
+            // 馬番グリッド (1〜18)
+            const grid = document.getElementById('horseGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 18; i++) {
+                const btn = document.createElement('div');
+                const type = state.horses[i] || 'NONE';
+                btn.className = 'horse-btn';
+                btn.setAttribute('data-type', type);
+                btn.onclick = () => toggleHorse(i);
+
+                let badge = '';
+                if (type === 'JIKU') badge = '軸';
+                else if (type === 'CHUANA') badge = '中';
+                else if (type === 'OANA') badge = '大';
+
+                btn.innerHTML = `
+                    <div class="horse-num">${i < 10 ? '0' + i : i}</div>
+                    <div class="horse-badge">${badge}</div>
+                `;
+                grid.appendChild(btn);
+            }
+
+            // 資金配分計算＆出力
+            calculateAndRender();
+        }
+
+        // --- 4. 買い目作成 & ターミナルレンダリング ---
+        function calculateAndRender() {
+            const terminal = document.getElementById('terminal');
+            const jikus = Object.keys(state.horses).filter(k => state.horses[k] === 'JIKU').map(Number).sort((a,b)=>a-b);
+            const chunas = Object.keys(state.horses).filter(k => state.horses[k] === 'CHUANA').map(Number).sort((a,b)=>a-b);
+            const oanas = Object.keys(state.horses).filter(k => state.horses[k] === 'OANA').map(Number).sort((a,b)=>a-b);
+            const others = [...chunas, ...oanas].sort((a,b)=>a-b);
+
+            if (jikus.length === 0) {
+                terminal.innerText = ">> [STATUS] WAITING FOR INPUT...\n>> 軸馬を1頭以上選択してください。";
+                return;
+            }
+
+            // ワイド
+            const wideCombinations = [];
+            if (jikus.length >= 2) {
+                for (let i = 0; i < jikus.length; i++) {
+                    for (let j = i + 1; j < jikus.length; j++) {
+                        wideCombinations.push([jikus[i], jikus[j]]);
+                    }
+                }
+            }
+            jikus.forEach(j => {
+                others.forEach(o => {
+                    const combo = [j, o].sort((a,b)=>a-b);
+                    if (!wideCombinations.some(c => c[0] === combo[0] && c[1] === combo[1])) {
+                        wideCombinations.push(combo);
+                    }
+                });
+            });
+
+            // 三連複
+            const sanrenCombinations = [];
+            const allSelected = [...jikus, ...chunas, ...oanas].sort((a,b)=>a-b);
+
+            if (jikus.length === 1) {
+                const jiku = jikus[0];
+                for (let i = 0; i < others.length; i++) {
+                    for (let j = i + 1; j < others.length; j++) {
+                        sanrenCombinations.push([jiku, others[i], others[j]]);
+                    }
+                }
+            } else if (jikus.length >= 2) {
+                if (allSelected.length >= 3) {
+                    for (let i = 0; i < allSelected.length; i++) {
+                        for (let j = i + 1; j < allSelected.length; j++) {
+                            for (let k = j + 1; k < allSelected.length; k++) {
+                                const combo = [allSelected[i], allSelected[j], allSelected[k]];
+                                if (combo.some(h => jikus.includes(h))) {
+                                    sanrenCombinations.push(combo);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            const widePoints = wideCombinations.length;
+            const sanrenPoints = sanrenCombinations.length;
+
+            if (widePoints === 0 && sanrenPoints === 0) {
+                terminal.innerText = ">> [STATUS] 買い目を生成できません。\n>> 相手馬(中穴・大穴)を追加してください。";
+                return;
+            }
+
+            const PRICE_PER_POINT = 100;
+            const totalWideCost = widePoints * PRICE_PER_POINT;
+            const totalSanrenCost = sanrenPoints * PRICE_PER_POINT;
+            const totalCost = totalWideCost + totalSanrenCost;
+
+            const config = RISK_CONFIGS[state.risk];
+            const fmt = num => num < 10 ? '0' + num : '' + num;
+
+            let out = `>>> MATRIX BET PLAN (予算上限制御連動) <<<\n`;
+            out += `設定予算: ¥${state.budget.toLocaleString()} | リスク: ${config.name}\n`;
+            out += `選択馬: 軸[${jikus.map(fmt).join(',')}] 中[${chunas.map(fmt).join(',')}] 大[${oanas.map(fmt).join(',')}]\n`;
+            out += `------------------------------\n`;
+
+            if (widePoints > 0) {
+                out += `■ ワイド (${widePoints}点 / 1点 ¥100)\n`;
+                wideCombinations.forEach(c => {
+                    out += `  ${fmt(c[0])}-${fmt(c[1])} : ¥100\n`;
+                });
+                out += `  小計: ¥${totalWideCost.toLocaleString()} (${widePoints}点)\n\n`;
+            }
+
+            if (sanrenPoints > 0) {
+                out += `■ 三連複 (${sanrenPoints}点 / 1点 ¥100)\n`;
+                sanrenCombinations.forEach(c => {
+                    out += `  ${fmt(c[0])}-${fmt(c[1])}-${fmt(c[2])} : ¥100\n`;
+                });
+                out += `  小計: ¥${totalSanrenCost.toLocaleString()} (${sanrenPoints}点)\n\n`;
+            }
+
+            out += `------------------------------\n`;
+            out += `合計購入点数 : ${widePoints + sanrenPoints} 点\n`;
+            out += `合計購入金額 : ¥${totalCost.toLocaleString()} / 上限 ¥${state.budget.toLocaleString()}\n`;
+            out += `残予算       : ¥${(state.budget - totalCost).toLocaleString()}\n`;
+            out += `予算判定     : ✅ SAFE (予算超過防止モード機能中)\n`;
+
+            terminal.innerText = out;
+        }
+
+        // クリップボードコピー
+        function copyToClipboard() {
+            const text = document.getElementById('terminal').innerText;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => showToast());
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast();
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // 初期化
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            if (Object.keys(state.horses).length === 0) {
+                state.horses = { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA' };
+            }
+            enforceBudgetCostLimit();
+            updateUI();
+        });
+    </script>
+</body>
+</html>
