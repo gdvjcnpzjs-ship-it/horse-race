@@ -404,31 +404,42 @@
             ctx.fillStyle = '#000000';
             ctx.fillRect(0, 0, 180, 180);
 
-            // 白い馬のシルエット
+            // 白い馬のシルエット（ベジェ曲線で滑らかに描画）
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.moveTo(40, 150);
-            ctx.lineTo(140, 150);
-            ctx.lineTo(130, 135);
-            ctx.lineTo(115, 130);
-            ctx.lineTo(120, 100);
-            ctx.lineTo(135, 75);
-            ctx.lineTo(120, 40);
-            ctx.lineTo(95, 30);
-            ctx.lineTo(75, 40);
-            ctx.lineTo(55, 60);
-            ctx.lineTo(45, 85);
-            ctx.lineTo(65, 80);
-            ctx.lineTo(85, 75);
-            ctx.lineTo(60, 105);
-            ctx.lineTo(50, 130);
+            
+            // 首の根元左（胸側）
+            ctx.moveTo(40, 152);
+            
+            // 胸から首の前ライン・喉元
+            ctx.bezierCurveTo(68, 135, 75, 105, 68, 85);
+            
+            // 喉元から下顎・鼻先へ
+            ctx.bezierCurveTo(63, 72, 48, 68, 52, 58);
+            
+            // 口元・マズル
+            ctx.bezierCurveTo(55, 52, 62, 52, 68, 56);
+            
+            // 鼻筋から額
+            ctx.bezierCurveTo(78, 48, 88, 42, 96, 42);
+            
+            // 耳
+            ctx.bezierCurveTo(100, 30, 104, 20, 108, 22);
+            ctx.bezierCurveTo(110, 26, 106, 38, 104, 45);
+            
+            // たてがみと首の後ろライン
+            ctx.bezierCurveTo(118, 55, 128, 68, 122, 82);
+            ctx.bezierCurveTo(135, 95, 142, 112, 134, 128);
+            ctx.bezierCurveTo(142, 138, 148, 146, 145, 152);
+            
+            // 底面
             ctx.closePath();
             ctx.fill();
 
-            // 目 (黒)
+            // 目（黒の抜き）
             ctx.fillStyle = '#000000';
             ctx.beginPath();
-            ctx.arc(95, 52, 4, 0, Math.PI * 2);
+            ctx.arc(76, 54, 3, 0, Math.PI * 2);
             ctx.fill();
 
             const iconUrl = canvas.toDataURL('image/png');
