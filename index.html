@@ -124,8 +124,7 @@
             display: flex;
             gap: 6px;
             overflow-x: auto;
-            padding-bottom: 6px;
-            margin-bottom: 8px;
+            padding-bottom: 4px;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -172,95 +171,113 @@
             border-color: var(--main-green);
         }
 
-        /* 予算設定 */
-        .budget-controls {
+        /* 購入フロー判定UI */
+        .flow-section {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.78rem;
+        }
+
+        .flow-question {
+            background: rgba(0,0,0,0.5);
+            border: 1px dashed var(--dim-green);
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
             gap: 6px;
         }
 
-        .btn-step {
-            background: var(--dark-green);
-            border: 1px solid var(--main-green);
-            color: var(--main-green);
-            width: 42px;
-            height: 42px;
-            font-size: 1.1rem;
+        .flow-question-text {
+            color: #fff;
             font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .btn-step:active {
-            background: var(--main-green);
-            color: #000;
-        }
-
-        .budget-display {
-            flex: 1;
-            text-align: center;
-            font-size: 1.35rem;
-            font-weight: bold;
-            background: #000;
-            border: 1px solid var(--dim-green);
-            border-radius: 6px;
-            padding: 6px 0;
-            color: var(--main-green);
-            text-shadow: 0 0 6px var(--main-green);
-            font-family: 'Courier New', monospace;
-        }
-
-        /* リスク設定 */
-        .risk-options {
+        .flow-options {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 6px;
         }
 
-        .risk-btn {
+        .flow-btn {
             background: var(--dark-green);
             border: 1px solid var(--dim-green);
             color: var(--dim-green);
-            padding: 8px 4px;
+            padding: 6px;
             font-size: 0.75rem;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .flow-btn.active {
+            background: var(--main-green);
+            border-color: var(--main-green);
+            color: #000;
+            box-shadow: 0 0 6px var(--main-green);
+        }
+
+        .flow-result-box {
+            background: #000;
+            border: 1px solid var(--main-green);
+            padding: 8px;
+            border-radius: 6px;
+            color: var(--main-green);
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* 付与マーク選択パレット */
+        .mark-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .mark-select-btn {
+            background: var(--dark-green);
+            border: 1px solid var(--dim-green);
+            color: var(--dim-green);
+            padding: 6px 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
             border-radius: 6px;
             text-align: center;
             cursor: pointer;
-            line-height: 1.3;
         }
 
-        .risk-btn.active {
-            border-color: var(--main-green);
-            color: #000;
-            background: var(--main-green);
-            font-weight: bold;
-            box-shadow: 0 0 8px var(--main-green);
+        .mark-select-btn.active[data-mark="JIKU"] {
+            border-color: var(--jiku-color);
+            background: rgba(255, 51, 102, 0.25);
+            color: var(--jiku-color);
+            box-shadow: 0 0 6px var(--jiku-color);
         }
 
-        /* 予算連動上限インジケーター */
-        .limits-info {
-            display: flex;
-            justify-content: space-around;
-            font-size: 0.75rem;
-            background: rgba(0,0,0,0.6);
-            padding: 6px;
-            border-radius: 4px;
-            margin-top: 8px;
-            border: 1px dashed var(--dim-green);
+        .mark-select-btn.active[data-mark="CHUANA"] {
+            border-color: var(--chuana-color);
+            background: rgba(255, 170, 0, 0.25);
+            color: var(--chuana-color);
+            box-shadow: 0 0 6px var(--chuana-color);
         }
 
-        .limit-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .mark-select-btn.active[data-mark="OANA"] {
+            border-color: var(--oana-color);
+            background: rgba(0, 204, 255, 0.25);
+            color: var(--oana-color);
+            box-shadow: 0 0 6px var(--oana-color);
         }
 
-        .tag-jiku { color: var(--jiku-color); font-weight: bold; }
-        .tag-chuana { color: var(--chuana-color); font-weight: bold; }
-        .tag-oana { color: var(--oana-color); font-weight: bold; }
+        .mark-select-btn.active[data-mark="EXCLUDE"] {
+            border-color: #888888;
+            background: rgba(136, 136, 136, 0.25);
+            color: #aaaaaa;
+            box-shadow: 0 0 6px #888888;
+        }
 
         /* 馬番トグルグリッド */
         .horse-grid {
@@ -411,24 +428,68 @@
             <div class="sub-title">SANRENPUKU & WIDE ALLOCATOR v2.2</div>
         </header>
 
-        <!-- [3] 馬番選択 -->
-        <div class="panel">
-            <div class="panel-title">
-                <span>[3] SELECT HORSES</span>
-                <span style="font-size:0.65rem; color:var(--dim-green);">1タップで状態切り替え</span>
-            </div>
+        <!-- レース選択タブ（画面上部に独立） -->
+        <div class="panel" style="padding: 8px 12px;">
+            <div style="font-size: 0.7rem; color: var(--dim-green); margin-bottom: 6px; font-weight: bold;">[RACE SELECT]</div>
             <div class="race-tabs" id="raceTabs"></div>
-            <div class="horse-grid" id="horseGrid"></div>
         </div>
 
-        <!-- [4] ターミナル出力 -->
+        <!-- [1] BET FLOW LOGIC -->
         <div class="panel">
-            <div class="panel-title">[4] OUTPUT TERMINAL</div>
+            <div class="panel-title">
+                <span>[1] BET FLOW LOGIC</span>
+                <span style="font-size:0.65rem; color:var(--dim-green);">条件分岐フロー</span>
+            </div>
+
+            <div class="flow-section">
+                <div class="flow-question" id="q1Box">
+                    <div class="flow-question-text">① 1着の確実が予測できるか？</div>
+                    <div class="flow-options">
+                        <div class="flow-btn" id="q1-yes" onclick="setFlowQ1('yes')">はい (YES)</div>
+                        <div class="flow-btn" id="q1-no" onclick="setFlowQ1('no')">いいえ (NO)</div>
+                    </div>
+                </div>
+
+                <div class="flow-question" id="q2Box" style="display:none;">
+                    <div class="flow-question-text" id="q2Text">② 2着が2頭に絞れるか？</div>
+                    <div class="flow-options">
+                        <div class="flow-btn" id="q2-yes" onclick="setFlowQ2('yes')">はい (YES)</div>
+                        <div class="flow-btn" id="q2-no" onclick="setFlowQ2('no')">いいえ (NO)</div>
+                    </div>
+                </div>
+
+                <div class="flow-result-box" id="flowResultBox">
+                    判定: フローを選択してください
+                </div>
+            </div>
+        </div>
+
+        <!-- [2] OUTPUT TERMINAL -->
+        <div class="panel">
+            <div class="panel-title">[2] OUTPUT TERMINAL</div>
             <div class="terminal" id="terminal"></div>
             <div class="action-btns">
                 <button class="btn-act btn-reset" onclick="resetSelections()">リセット</button>
                 <button class="btn-act" onclick="copyToClipboard()">コピー</button>
             </div>
+        </div>
+
+        <!-- [3] SELECT HORSES -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>[3] SELECT HORSES</span>
+                <span style="font-size:0.65rem; color:var(--dim-green);">マークを選んで馬番をタップ</span>
+            </div>
+            
+            <!-- マーク選択パレット -->
+            <div class="mark-selector" id="markSelector">
+                <div class="mark-select-btn active" data-mark="JIKU" onclick="setMark('JIKU')">軸</div>
+                <div class="mark-select-btn" data-mark="CHUANA" onclick="setMark('CHUANA')">中穴</div>
+                <div class="mark-select-btn" data-mark="OANA" onclick="setMark('OANA')">大穴</div>
+                <div class="mark-select-btn" data-mark="EXCLUDE" onclick="setMark('EXCLUDE')">消×</div>
+            </div>
+
+            <div class="horse-grid" id="horseGrid"></div>
         </div>
     </div>
 
@@ -505,17 +566,18 @@
         // --- 3. アプリケーション状態 & 構成 ---
         let state = {
             currentRace: 1,
+            selectedMark: 'JIKU',
             races: {
-                1: { name: '', horses: {} },
-                2: { name: '', horses: {} },
-                3: { name: '', horses: {} },
-                4: { name: '', horses: {} },
-                5: { name: '', horses: {} },
-                6: { name: '', horses: {} },
-                7: { name: '', horses: {} },
-                8: { name: '', horses: {} },
-                9: { name: '', horses: {} },
-                10: { name: '', horses: {} }
+                1: { name: '', q1: null, q2: null, horses: {} },
+                2: { name: '', q1: null, q2: null, horses: {} },
+                3: { name: '', q1: null, q2: null, horses: {} },
+                4: { name: '', q1: null, q2: null, horses: {} },
+                5: { name: '', q1: null, q2: null, horses: {} },
+                6: { name: '', q1: null, q2: null, horses: {} },
+                7: { name: '', q1: null, q2: null, horses: {} },
+                8: { name: '', q1: null, q2: null, horses: {} },
+                9: { name: '', q1: null, q2: null, horses: {} },
+                10: { name: '', q1: null, q2: null, horses: {} }
             }
         };
 
@@ -528,15 +590,23 @@
                         for (let i = 1; i <= 10; i++) {
                             if (parsed.races[i]) {
                                 if (typeof parsed.races[i] === 'object' && parsed.races[i].horses !== undefined) {
-                                    state.races[i] = parsed.races[i];
+                                    state.races[i] = {
+                                        name: parsed.races[i].name || '',
+                                        q1: parsed.races[i].q1 !== undefined ? parsed.races[i].q1 : null,
+                                        q2: parsed.races[i].q2 !== undefined ? parsed.races[i].q2 : null,
+                                        horses: parsed.races[i].horses || {}
+                                    };
                                 } else {
-                                    state.races[i] = { name: '', horses: parsed.races[i] || {} };
+                                    state.races[i] = { name: '', q1: null, q2: null, horses: parsed.races[i] || {} };
                                 }
                             }
                         }
                     }
                     if (parsed.currentRace && parsed.currentRace <= 10) {
                         state.currentRace = parsed.currentRace;
+                    }
+                    if (parsed.selectedMark) {
+                        state.selectedMark = parsed.selectedMark;
                     }
                 }
             } catch (e) {
@@ -558,29 +628,47 @@
             saveState();
         }
 
+        function setMark(mark) {
+            state.selectedMark = mark;
+            updateUI();
+            saveState();
+        }
+
         function updateRaceName(raceNum, name) {
             if (!state.races[raceNum]) {
-                state.races[raceNum] = { name: '', horses: {} };
+                state.races[raceNum] = { name: '', q1: null, q2: null, horses: {} };
             }
             state.races[raceNum].name = name;
             saveState();
         }
 
+        function setFlowQ1(val) {
+            const race = state.races[state.currentRace];
+            race.q1 = val;
+            race.q2 = null; // リセット
+            updateUI();
+            saveState();
+        }
+
+        function setFlowQ2(val) {
+            const race = state.races[state.currentRace];
+            race.q2 = val;
+            updateUI();
+            saveState();
+        }
+
         function toggleHorse(num) {
             if (!state.races[state.currentRace]) {
-                state.races[state.currentRace] = { name: '', horses: {} };
+                state.races[state.currentRace] = { name: '', q1: null, q2: null, horses: {} };
             }
             const currentRaceObj = state.races[state.currentRace];
             const horses = currentRaceObj.horses || {};
             const current = horses[num] || 'NONE';
-            const sequence = ['NONE', 'JIKU', 'CHUANA', 'OANA', 'EXCLUDE'];
-            let nextIndex = (sequence.indexOf(current) + 1) % sequence.length;
 
-            const candidate = sequence[nextIndex];
-            if (candidate === 'NONE') {
+            if (current === state.selectedMark) {
                 delete horses[num];
             } else {
-                horses[num] = candidate;
+                horses[num] = state.selectedMark;
             }
             currentRaceObj.horses = horses;
 
@@ -591,6 +679,8 @@
         function resetSelections() {
             if (state.races[state.currentRace]) {
                 state.races[state.currentRace].horses = {};
+                state.races[state.currentRace].q1 = null;
+                state.races[state.currentRace].q2 = null;
             }
             updateUI();
             saveState();
@@ -604,7 +694,7 @@
                 const tab = document.createElement('div');
                 tab.className = `race-tab ${state.currentRace === r ? 'active' : ''}`;
                 
-                const raceData = state.races[r] || { name: '', horses: {} };
+                const raceData = state.races[r] || { name: '', q1: null, q2: null, horses: {} };
                 
                 tab.innerHTML = `
                     <span class="race-tab-num">${r}</span>
@@ -614,10 +704,68 @@
                 tabsContainer.appendChild(tab);
             }
 
+            // フロー状態の反映
+            const currentRaceObj = state.races[state.currentRace] || { name: '', q1: null, q2: null, horses: {} };
+            const q1Yes = document.getElementById('q1-yes');
+            const q1No = document.getElementById('q1-no');
+            q1Yes.className = `flow-btn ${currentRaceObj.q1 === 'yes' ? 'active' : ''}`;
+            q1No.className = `flow-btn ${currentRaceObj.q1 === 'no' ? 'active' : ''}`;
+
+            const q2Box = document.getElementById('q2Box');
+            const q2Text = document.getElementById('q2Text');
+            const q2Yes = document.getElementById('q2-yes');
+            const q2No = document.getElementById('q2-no');
+
+            if (currentRaceObj.q1 !== null) {
+                q2Box.style.display = 'flex';
+                if (currentRaceObj.q1 === 'yes') {
+                    q2Text.innerText = '② 2着が2頭に絞れるか？';
+                } else {
+                    q2Text.innerText = '⑤ 1着・2着の軸になりそうな2頭がいるか？';
+                }
+                q2Yes.className = `flow-btn ${currentRaceObj.q2 === 'yes' ? 'active' : ''}`;
+                q2No.className = `flow-btn ${currentRaceObj.q2 === 'no' ? 'active' : ''}`;
+            } else {
+                q2Box.style.display = 'none';
+            }
+
+            // フロー判定結果とターミナル出力の生成
+            let flowResultText = '判定: フローを選択してください';
+            let terminalText = '';
+
+            if (currentRaceObj.q1 === 'yes' && currentRaceObj.q2 === 'yes') {
+                flowResultText = '③ ③フロー該当 (10点)';
+                terminalText = '>>> 買い方指示フロー ③ <<<\n- 条件: 1着確実予測あり、2着2頭に絞れる\n- 指示: 7頭を選び、1（軸）-2（中穴）-2（中穴）+4（大穴）で購入 (10点)\n';
+            } else if (currentRaceObj.q1 === 'yes' && currentRaceObj.q2 === 'no') {
+                flowResultText = '④ ④フロー該当 (9点)';
+                terminalText = '>>> 買い方指示フロー ④ <<<\n- 条件: 1着確実予測あり、2着2頭に絞れない\n- 指示: 5頭を選び、1（軸）-3（中穴）-3（中穴）+1（大穴）で購入 (9点)\n';
+            } else if (currentRaceObj.q1 === 'no' && currentRaceObj.q2 === 'yes') {
+                flowResultText = '⑥ ⑥フロー該当 (10点)';
+                terminalText = '>>> 買い方指示フロー ⑥ <<<\n- 条件: 1着確実予測なし、軸になりそうな2頭あり\n- 指示: 計7頭選び、2（軸）-2（軸）-5（中穴）で購入 (10点)\n';
+            } else if (currentRaceObj.q1 === 'no' && currentRaceObj.q2 === 'no') {
+                flowResultText = '⑦ ⑦フロー該当 (10点)';
+                terminalText = '>>> 買い方指示フロー ⑦ <<<\n- 条件: 1着確実予測なし、軸になりそうな2頭なし\n- 指示: 計5頭選び、3連複のBOX購入 (10点)\n';
+            } else {
+                terminalText = '>> [STATUS] 買い方フローの質問①〜②に回答してください。';
+            }
+
+            document.getElementById('flowResultBox').innerText = flowResultText;
+            document.getElementById('terminal').innerText = terminalText;
+
+            // マーク選択パレットの活性状態更新
+            const markButtons = document.querySelectorAll('.mark-select-btn');
+            markButtons.forEach(btn => {
+                const mark = btn.getAttribute('data-mark');
+                if (mark === state.selectedMark) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
             // 馬番グリッドの描画
             const grid = document.getElementById('horseGrid');
             grid.innerHTML = '';
-            const currentRaceObj = state.races[state.currentRace] || { name: '', horses: {} };
             const currentHorses = currentRaceObj.horses || {};
             for (let i = 1; i <= 18; i++) {
                 const btn = document.createElement('div');
@@ -665,13 +813,13 @@
             loadState();
             let hasData = false;
             for (let i = 1; i <= 10; i++) {
-                if (Object.keys(state.races[i].horses || {}).length > 0 || state.races[i].name) {
+                if (Object.keys(state.races[i].horses || {}).length > 0 || state.races[i].name || state.races[i].q1 !== null) {
                     hasData = true;
                     break;
                 }
             }
             if (!hasData) {
-                state.races[1] = { name: '東京11R', horses: { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA' } };
+                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA' } };
             }
             updateUI();
         });
