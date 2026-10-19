@@ -119,6 +119,59 @@
             padding-left: 6px;
         }
 
+        /* レース選択タブ */
+        .race-tabs {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .race-tab {
+            flex: 0 0 auto;
+            background: var(--dark-green);
+            border: 1px solid var(--dim-green);
+            color: var(--dim-green);
+            padding: 6px 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 95px;
+        }
+
+        .race-tab.active {
+            border-color: var(--main-green);
+            color: var(--main-green);
+            background: rgba(0, 255, 102, 0.1);
+            box-shadow: 0 0 8px var(--main-green);
+        }
+
+        .race-tab-num {
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .race-tab-name {
+            background: #000;
+            border: 1px solid var(--dim-green);
+            color: var(--main-green);
+            font-size: 0.65rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            width: 65px;
+            font-family: var(--font-family);
+        }
+        .race-tab.active .race-tab-name {
+            border-color: var(--main-green);
+        }
+
         /* 予算設定 */
         .budget-controls {
             display: flex;
@@ -358,62 +411,20 @@
             <div class="sub-title">SANRENPUKU & WIDE ALLOCATOR v2.2</div>
         </header>
 
-        <!-- [1] 予算設定 -->
-        <div class="panel">
-            <div class="panel-title">
-                <span>[1] TOTAL BUDGET</span>
-                <span style="font-size:0.65rem; color:var(--dim-green);">100円単位（絶対不越）</span>
-            </div>
-            <div class="budget-controls">
-                <button class="btn-step" onclick="changeBudget(-1000)">-1k</button>
-                <button class="btn-step" onclick="changeBudget(-100)">-</button>
-                <div class="budget-display" id="budgetDisplay">¥3,000</div>
-                <button class="btn-step" onclick="changeBudget(100)">+</button>
-                <button class="btn-step" onclick="changeBudget(1000)">+1k</button>
-            </div>
-        </div>
-
-        <!-- [2] リスク設定 -->
-        <div class="panel">
-            <div class="panel-title">
-                <span>[2] RISK LEVEL</span>
-                <span style="font-size:0.65rem; color:var(--dim-green);" id="riskRatioLabel">ワイド 70% : 三連複 30%</span>
-            </div>
-            <div class="risk-options">
-                <div class="risk-btn active" id="risk-LOW" onclick="setRisk('LOW')">堅実<br>(LOW)</div>
-                <div class="risk-btn" id="risk-MID" onclick="setRisk('MID')">バランス<br>(MID)</div>
-                <div class="risk-btn" id="risk-HIGH" onclick="setRisk('HIGH')">挑戦<br>(HIGH)</div>
-            </div>
-
-            <div class="limits-info">
-                <div class="limit-item">
-                    <span class="tag-jiku">●軸</span>
-                    <span id="count-JIKU">0/2</span>
-                </div>
-                <div class="limit-item">
-                    <span class="tag-chuana">▲中</span>
-                    <span id="count-CHUANA">0/2</span>
-                </div>
-                <div class="limit-item">
-                    <span class="tag-oana">★大</span>
-                    <span id="count-OANA">0/1</span>
-                </div>
-            </div>
-        </div>
-
         <!-- [3] 馬番選択 -->
         <div class="panel">
             <div class="panel-title">
                 <span>[3] SELECT HORSES</span>
                 <span style="font-size:0.65rem; color:var(--dim-green);">1タップで状態切り替え</span>
             </div>
+            <div class="race-tabs" id="raceTabs"></div>
             <div class="horse-grid" id="horseGrid"></div>
         </div>
 
         <!-- [4] ターミナル出力 -->
         <div class="panel">
             <div class="panel-title">[4] OUTPUT TERMINAL</div>
-            <div class="terminal" id="terminal">Initializing system...</div>
+            <div class="terminal" id="terminal"></div>
             <div class="action-btns">
                 <button class="btn-act btn-reset" onclick="resetSelections()">リセット</button>
                 <button class="btn-act" onclick="copyToClipboard()">コピー</button>
@@ -425,45 +436,36 @@
 
     <script>
         // --- 1. Apple Touch Icon (180x180 PNG Canvas) 動的生成 ---
-        // 条件厳守: Canvasで180x180ピクセルのPNGを動的生成し<link id="appleTouchIcon">へData URI(image/png)で即時セット
         (function generateIcon() {
             const canvas = document.createElement('canvas');
             canvas.width = 180;
             canvas.height = 180;
             const ctx = canvas.getContext('2d');
 
-            // 背景描画（ダークグリーン / ブラック基調）
             ctx.fillStyle = '#050805';
             ctx.fillRect(0, 0, 180, 180);
 
-            // ネオングリーンの枠線
             ctx.strokeStyle = '#00ff66';
             ctx.lineWidth = 4;
             ctx.strokeRect(4, 4, 172, 172);
 
-            // 添付画像の「前脚を高く上げた躍動感ある跳ね馬」を高精細なシルエットとしてCanvasへ直接ピクセル描画
             const horseImage = new Image();
             horseImage.onload = function() {
-                // 白い跳ね馬のシルエットを描画
                 ctx.drawImage(horseImage, 20, 20, 140, 140);
 
-                // 180x180 PNG Data URI 生成
                 const dataUri = canvas.toDataURL('image/png');
 
-                // <link id="appleTouchIcon"> へ Data URI を即時セット
                 const appleIconLink = document.getElementById('appleTouchIcon');
                 if (appleIconLink) {
                     appleIconLink.href = dataUri;
                 }
 
-                // 画面上でもデザインを確認できるようヘッダープレビューにも反映
                 const headerPreview = document.getElementById('headerIconPreview');
                 if (headerPreview) {
                     headerPreview.src = dataUri;
                 }
             };
 
-            // 添付画像の立ち馬（リアリング）シルエットデータ（Base64 PNG）
             horseImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAMAAAAvK2D7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF////00003Uf3eAAAAMElEQVR42u3XQQqAMBAEwSj+/83DgxB8wToIup302k3Nmtda+952932e53mvh18mCwoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgr/C34mO3me53me53me53n/3AM4a1/vXwFvTAAAAABJRU5ErkJggg==';
         })();
 
@@ -501,133 +503,41 @@
         setInterval(drawMatrix, 40);
 
         // --- 3. アプリケーション状態 & 構成 ---
-        const RISK_CONFIGS = {
-            LOW: {
-                name: '堅実 (LOW)',
-                ratioLabel: 'ワイド重視',
-                baseJiku: 2,
-            },
-            MID: {
-                name: 'バランス (MID)',
-                ratioLabel: 'バランス配分',
-                baseJiku: 1,
-            },
-            HIGH: {
-                name: '挑戦 (HIGH)',
-                ratioLabel: '三連複重視',
-                baseJiku: 1,
-            }
-        };
-
         let state = {
-            budget: 3000,
-            risk: 'LOW',
-            horses: {}
+            currentRace: 1,
+            races: {
+                1: { name: '', horses: {} },
+                2: { name: '', horses: {} },
+                3: { name: '', horses: {} },
+                4: { name: '', horses: {} },
+                5: { name: '', horses: {} },
+                6: { name: '', horses: {} },
+                7: { name: '', horses: {} },
+                8: { name: '', horses: {} },
+                9: { name: '', horses: {} },
+                10: { name: '', horses: {} }
+            }
         };
-
-        // 点数計算関数
-        function calculateTotalPoints(horsesMap) {
-            const jikus = Object.keys(horsesMap).filter(k => horsesMap[k] === 'JIKU').map(Number);
-            const chunas = Object.keys(horsesMap).filter(k => horsesMap[k] === 'CHUANA').map(Number);
-            const oanas = Object.keys(horsesMap).filter(k => horsesMap[k] === 'OANA').map(Number);
-            const others = [...chunas, ...oanas];
-
-            if (jikus.length === 0) return 0;
-
-            // ワイド
-            const wideCombinations = [];
-            if (jikus.length >= 2) {
-                for (let i = 0; i < jikus.length; i++) {
-                    for (let j = i + 1; j < jikus.length; j++) {
-                        wideCombinations.push([jikus[i], jikus[j]]);
-                    }
-                }
-            }
-            jikus.forEach(j => {
-                others.forEach(o => {
-                    const combo = [j, o].sort((a,b)=>a-b);
-                    if (!wideCombinations.some(c => c[0] === combo[0] && c[1] === combo[1])) {
-                        wideCombinations.push(combo);
-                    }
-                });
-            });
-
-            // 三連複
-            const sanrenCombinations = [];
-            const allSelected = [...jikus, ...chunas, ...oanas].sort((a,b)=>a-b);
-
-            if (jikus.length === 1) {
-                const jiku = jikus[0];
-                for (let i = 0; i < others.length; i++) {
-                    for (let j = i + 1; j < others.length; j++) {
-                        sanrenCombinations.push([jiku, others[i], others[j]]);
-                    }
-                }
-            } else if (jikus.length >= 2) {
-                if (allSelected.length >= 3) {
-                    for (let i = 0; i < allSelected.length; i++) {
-                        for (let j = i + 1; j < allSelected.length; j++) {
-                            for (let k = j + 1; k < allSelected.length; k++) {
-                                const combo = [allSelected[i], allSelected[j], allSelected[k]];
-                                if (combo.some(h => jikus.includes(h))) {
-                                    sanrenCombinations.push(combo);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return wideCombinations.length + sanrenCombinations.length;
-        }
-
-        // 予算とリスクに応じた「最大可能頭数上限」を動的算出
-        function computeDynamicLimits() {
-            const maxPoints = Math.floor(state.budget / 100);
-            const risk = state.risk;
-
-            let jikuLimit = (risk === 'LOW' && maxPoints >= 15) ? 2 : 1;
-
-            let maxOthers = 0;
-            for (let n = 1; n <= 10; n++) {
-                let p = 0;
-                if (jikuLimit === 1) {
-                    p = n + (n * (n - 1)) / 2;
-                } else {
-                    p = (1 + 2 * n) + (n + (n * (n - 1)) / 2);
-                }
-                if (p <= maxPoints) {
-                    maxOthers = n;
-                } else {
-                    break;
-                }
-            }
-
-            let chuanaLimit = 0;
-            let oanaLimit = 0;
-
-            if (risk === 'LOW') {
-                chuanaLimit = Math.ceil(maxOthers * 0.7);
-                oanaLimit = Math.max(0, maxOthers - chuanaLimit);
-            } else if (risk === 'MID') {
-                chuanaLimit = Math.ceil(maxOthers * 0.6);
-                oanaLimit = Math.max(0, maxOthers - chuanaLimit);
-            } else {
-                chuanaLimit = Math.floor(maxOthers * 0.4);
-                oanaLimit = Math.max(0, maxOthers - chuanaLimit);
-            }
-
-            return { JIKU: jikuLimit, CHUANA: chuanaLimit, OANA: oanaLimit };
-        }
 
         function loadState() {
             try {
                 const saved = localStorage.getItem('matrix_horse_bet_state');
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    state.budget = parsed.budget || 3000;
-                    state.risk = parsed.risk || 'LOW';
-                    state.horses = parsed.horses || {};
+                    if (parsed.races) {
+                        for (let i = 1; i <= 10; i++) {
+                            if (parsed.races[i]) {
+                                if (typeof parsed.races[i] === 'object' && parsed.races[i].horses !== undefined) {
+                                    state.races[i] = parsed.races[i];
+                                } else {
+                                    state.races[i] = { name: '', horses: parsed.races[i] || {} };
+                                }
+                            }
+                        }
+                    }
+                    if (parsed.currentRace && parsed.currentRace <= 10) {
+                        state.currentRace = parsed.currentRace;
+                    }
                 }
             } catch (e) {
                 console.error(e);
@@ -642,121 +552,76 @@
             }
         }
 
-        function changeBudget(amount) {
-            state.budget = Math.max(1000, Math.min(100000, state.budget + amount));
-            enforceBudgetCostLimit();
+        function selectRace(raceNum) {
+            state.currentRace = raceNum;
             updateUI();
             saveState();
         }
 
-        function setRisk(level) {
-            state.risk = level;
-            enforceBudgetCostLimit();
-            updateUI();
-            saveState();
-        }
-
-        function enforceBudgetCostLimit() {
-            const maxPoints = Math.floor(state.budget / 100);
-
-            const limits = computeDynamicLimits();
-            ['JIKU', 'CHUANA', 'OANA'].forEach(type => {
-                const selected = Object.keys(state.horses)
-                    .filter(k => state.horses[k] === type)
-                    .map(Number);
-                while (selected.length > limits[type]) {
-                    const removeNum = selected.pop();
-                    delete state.horses[removeNum];
-                }
-            });
-
-            while (calculateTotalPoints(state.horses) > maxPoints) {
-                const oanas = Object.keys(state.horses).filter(k => state.horses[k] === 'OANA');
-                if (oanas.length > 0) {
-                    delete state.horses[oanas[oanas.length - 1]];
-                    continue;
-                }
-                const chunas = Object.keys(state.horses).filter(k => state.horses[k] === 'CHUANA');
-                if (chunas.length > 0) {
-                    delete state.horses[chunas[chunas.length - 1]];
-                    continue;
-                }
-                const jikus = Object.keys(state.horses).filter(k => state.horses[k] === 'JIKU');
-                if (jikus.length > 0) {
-                    delete state.horses[jikus[jikus.length - 1]];
-                    continue;
-                }
-                break;
+        function updateRaceName(raceNum, name) {
+            if (!state.races[raceNum]) {
+                state.races[raceNum] = { name: '', horses: {} };
             }
+            state.races[raceNum].name = name;
+            saveState();
         }
 
         function toggleHorse(num) {
-            const current = state.horses[num] || 'NONE';
+            if (!state.races[state.currentRace]) {
+                state.races[state.currentRace] = { name: '', horses: {} };
+            }
+            const currentRaceObj = state.races[state.currentRace];
+            const horses = currentRaceObj.horses || {};
+            const current = horses[num] || 'NONE';
             const sequence = ['NONE', 'JIKU', 'CHUANA', 'OANA', 'EXCLUDE'];
             let nextIndex = (sequence.indexOf(current) + 1) % sequence.length;
 
-            const limits = computeDynamicLimits();
-            const maxPoints = Math.floor(state.budget / 100);
-
-            for (let i = 0; i < sequence.length; i++) {
-                const candidate = sequence[nextIndex];
-                if (candidate === 'NONE') {
-                    delete state.horses[num];
-                    break;
-                }
-                if (candidate === 'EXCLUDE') {
-                    state.horses[num] = 'EXCLUDE';
-                    break;
-                }
-
-                const count = getCount(candidate) - (current === candidate ? 1 : 0);
-                if (count < limits[candidate]) {
-                    const testMap = { ...state.horses, [num]: candidate };
-                    if (calculateTotalPoints(testMap) <= maxPoints) {
-                        state.horses[num] = candidate;
-                        break;
-                    }
-                }
-                nextIndex = (nextIndex + 1) % sequence.length;
+            const candidate = sequence[nextIndex];
+            if (candidate === 'NONE') {
+                delete horses[num];
+            } else {
+                horses[num] = candidate;
             }
-
-            if (state.horses[num] === 'NONE') {
-                delete state.horses[num];
-            }
+            currentRaceObj.horses = horses;
 
             updateUI();
             saveState();
         }
 
-        function getCount(type) {
-            return Object.values(state.horses).filter(v => v === type).length;
-        }
-
         function resetSelections() {
-            state.horses = {};
+            if (state.races[state.currentRace]) {
+                state.races[state.currentRace].horses = {};
+            }
             updateUI();
             saveState();
         }
 
         function updateUI() {
-            document.getElementById('budgetDisplay').innerText = `¥${state.budget.toLocaleString()}`;
+            // タブの描画 (1〜10)
+            const tabsContainer = document.getElementById('raceTabs');
+            tabsContainer.innerHTML = '';
+            for (let r = 1; r <= 10; r++) {
+                const tab = document.createElement('div');
+                tab.className = `race-tab ${state.currentRace === r ? 'active' : ''}`;
+                
+                const raceData = state.races[r] || { name: '', horses: {} };
+                
+                tab.innerHTML = `
+                    <span class="race-tab-num">${r}</span>
+                    <input type="text" class="race-tab-name" placeholder="レース名" value="${raceData.name || ''}" oninput="updateRaceName(${r}, this.value)" onclick="event.stopPropagation()">
+                `;
+                tab.onclick = () => selectRace(r);
+                tabsContainer.appendChild(tab);
+            }
 
-            ['LOW', 'MID', 'HIGH'].forEach(r => {
-                const btn = document.getElementById(`risk-${r}`);
-                btn.className = `risk-btn ${state.risk === r ? 'active' : ''}`;
-            });
-            document.getElementById('riskRatioLabel').innerText = RISK_CONFIGS[state.risk].ratioLabel;
-
-            const limits = computeDynamicLimits();
-            document.getElementById('count-JIKU').innerText = `${getCount('JIKU')}/${limits.JIKU}`;
-            document.getElementById('count-CHUANA').innerText = `${getCount('CHUANA')}/${limits.CHUANA}`;
-            document.getElementById('count-OANA').innerText = `${getCount('OANA')}/${limits.OANA}`;
-
+            // 馬番グリッドの描画
             const grid = document.getElementById('horseGrid');
             grid.innerHTML = '';
+            const currentRaceObj = state.races[state.currentRace] || { name: '', horses: {} };
+            const currentHorses = currentRaceObj.horses || {};
             for (let i = 1; i <= 18; i++) {
                 const btn = document.createElement('div');
-                const type = state.horses[i] || 'NONE';
+                const type = currentHorses[i] || 'NONE';
                 btn.className = 'horse-btn';
                 btn.setAttribute('data-type', type);
                 btn.onclick = () => toggleHorse(i);
@@ -773,109 +638,6 @@
                 `;
                 grid.appendChild(btn);
             }
-
-            calculateAndRender();
-        }
-
-        // --- 4. 買い目作成 & ターミナルレンダリング ---
-        function calculateAndRender() {
-            const terminal = document.getElementById('terminal');
-            const jikus = Object.keys(state.horses).filter(k => state.horses[k] === 'JIKU').map(Number).sort((a,b)=>a-b);
-            const chunas = Object.keys(state.horses).filter(k => state.horses[k] === 'CHUANA').map(Number).sort((a,b)=>a-b);
-            const oanas = Object.keys(state.horses).filter(k => state.horses[k] === 'OANA').map(Number).sort((a,b)=>a-b);
-            const others = [...chunas, ...oanas].sort((a,b)=>a-b);
-
-            if (jikus.length === 0) {
-                terminal.innerText = ">> [STATUS] WAITING FOR INPUT...\n>> 軸馬を1頭以上選択してください。";
-                return;
-            }
-
-            const wideCombinations = [];
-            if (jikus.length >= 2) {
-                for (let i = 0; i < jikus.length; i++) {
-                    for (let j = i + 1; j < jikus.length; j++) {
-                        wideCombinations.push([jikus[i], jikus[j]]);
-                    }
-                }
-            }
-            jikus.forEach(j => {
-                others.forEach(o => {
-                    const combo = [j, o].sort((a,b)=>a-b);
-                    if (!wideCombinations.some(c => c[0] === combo[0] && c[1] === combo[1])) {
-                        wideCombinations.push(combo);
-                    }
-                });
-            });
-
-            const sanrenCombinations = [];
-            const allSelected = [...jikus, ...chunas, ...oanas].sort((a,b)=>a-b);
-
-            if (jikus.length === 1) {
-                const jiku = jikus[0];
-                for (let i = 0; i < others.length; i++) {
-                    for (let j = i + 1; j < others.length; j++) {
-                        sanrenCombinations.push([jiku, others[i], others[j]]);
-                    }
-                }
-            } else if (jikus.length >= 2) {
-                if (allSelected.length >= 3) {
-                    for (let i = 0; i < allSelected.length; i++) {
-                        for (let j = i + 1; j < allSelected.length; j++) {
-                            for (let k = j + 1; k < allSelected.length; k++) {
-                                const combo = [allSelected[i], allSelected[j], allSelected[k]];
-                                if (combo.some(h => jikus.includes(h))) {
-                                    sanrenCombinations.push(combo);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            const widePoints = wideCombinations.length;
-            const sanrenPoints = sanrenCombinations.length;
-
-            if (widePoints === 0 && sanrenPoints === 0) {
-                terminal.innerText = ">> [STATUS] 買い目を生成できません。\n>> 相手馬(中穴・大穴)を追加してください。";
-                return;
-            }
-
-            const PRICE_PER_POINT = 100;
-            const totalWideCost = widePoints * PRICE_PER_POINT;
-            const totalSanrenCost = sanrenPoints * PRICE_PER_POINT;
-            const totalCost = totalWideCost + totalSanrenCost;
-
-            const config = RISK_CONFIGS[state.risk];
-            const fmt = num => num < 10 ? '0' + num : '' + num;
-
-            let out = `>>> MATRIX BET PLAN (予算上限制御連動) <<<\n`;
-            out += `設定予算: ¥${state.budget.toLocaleString()} | リスク: ${config.name}\n`;
-            out += `選択馬: 軸[${jikus.map(fmt).join(',')}] 中[${chunas.map(fmt).join(',')}] 大[${oanas.map(fmt).join(',')}]\n`;
-            out += `------------------------------\n`;
-
-            if (widePoints > 0) {
-                out += `■ ワイド (${widePoints}点 / 1点 ¥100)\n`;
-                wideCombinations.forEach(c => {
-                    out += `  ${fmt(c[0])}-${fmt(c[1])} : ¥100\n`;
-                });
-                out += `  小計: ¥${totalWideCost.toLocaleString()} (${widePoints}点)\n\n`;
-            }
-
-            if (sanrenPoints > 0) {
-                out += `■ 三連複 (${sanrenPoints}点 / 1点 ¥100)\n`;
-                sanrenCombinations.forEach(c => {
-                    out += `  ${fmt(c[0])}-${fmt(c[1])}-${fmt(c[2])} : ¥100\n`;
-                });
-                out += `  小計: ¥${totalSanrenCost.toLocaleString()} (${sanrenPoints}点)\n\n`;
-            }
-
-            out += `------------------------------\n`;
-            out += `合計購入点数 : ${widePoints + sanrenPoints} 点\n`;
-            out += `合計購入金額 : ¥${totalCost.toLocaleString()} / 上限 ¥${state.budget.toLocaleString()}\n`;
-            out += `残予算       : ¥${(state.budget - totalCost).toLocaleString()}\n`;
-            out += `予算判定     : ✅ SAFE (予算超過防止モード機能中)\n`;
-
-            terminal.innerText = out;
         }
 
         function copyToClipboard() {
@@ -901,10 +663,16 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
-            if (Object.keys(state.horses).length === 0) {
-                state.horses = { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA' };
+            let hasData = false;
+            for (let i = 1; i <= 10; i++) {
+                if (Object.keys(state.races[i].horses || {}).length > 0 || state.races[i].name) {
+                    hasData = true;
+                    break;
+                }
             }
-            enforceBudgetCostLimit();
+            if (!hasData) {
+                state.races[1] = { name: '東京11R', horses: { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA' } };
+            }
             updateUI();
         });
     </script>
