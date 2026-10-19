@@ -129,7 +129,7 @@
         }
 
         .race-tab {
-            flex: 0 0 auto;
+            flex: 1 1 0%;
             background: var(--dark-green);
             border: 1px solid var(--dim-green);
             color: var(--dim-green);
@@ -141,8 +141,9 @@
             font-family: 'Courier New', monospace;
             display: flex;
             align-items: center;
-            gap: 4px;
-            min-width: 95px;
+            justify-content: center;
+            gap: 8px;
+            min-width: 0;
         }
 
         .race-tab.active {
@@ -164,7 +165,8 @@
             font-size: 0.65rem;
             padding: 2px 4px;
             border-radius: 4px;
-            width: 65px;
+            flex: 1;
+            max-width: 120px;
             font-family: var(--font-family);
         }
         .race-tab.active .race-tab-name {
@@ -468,10 +470,6 @@
         <div class="panel">
             <div class="panel-title">[2] OUTPUT TERMINAL</div>
             <div class="terminal" id="terminal"></div>
-            <div class="action-btns">
-                <button class="btn-act btn-reset" onclick="resetSelections()">リセット</button>
-                <button class="btn-act" onclick="copyToClipboard()">コピー</button>
-            </div>
         </div>
 
         <!-- [3] SELECT HORSES -->
@@ -490,6 +488,22 @@
             </div>
 
             <div class="horse-grid" id="horseGrid"></div>
+
+            <div style="margin-top: 8px;">
+                <button class="btn-act btn-reset" onclick="resetSelections()" style="width: 100%;">リセット</button>
+            </div>
+        </div>
+
+        <!-- [4] BET COMBINATIONS -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>[4] BET COMBINATIONS</span>
+                <span style="font-size:0.65rem; color:var(--dim-green);">買い目一覧</span>
+            </div>
+            <div class="terminal" id="combTerminal">条件に合致する馬が選択されていません</div>
+            <div style="margin-top: 8px;">
+                <button class="btn-act" onclick="copyCombinations()" style="width: 100%;">買い目をコピー</button>
+            </div>
         </div>
     </div>
 
@@ -569,15 +583,7 @@
             selectedMark: 'JIKU',
             races: {
                 1: { name: '', q1: null, q2: null, horses: {} },
-                2: { name: '', q1: null, q2: null, horses: {} },
-                3: { name: '', q1: null, q2: null, horses: {} },
-                4: { name: '', q1: null, q2: null, horses: {} },
-                5: { name: '', q1: null, q2: null, horses: {} },
-                6: { name: '', q1: null, q2: null, horses: {} },
-                7: { name: '', q1: null, q2: null, horses: {} },
-                8: { name: '', q1: null, q2: null, horses: {} },
-                9: { name: '', q1: null, q2: null, horses: {} },
-                10: { name: '', q1: null, q2: null, horses: {} }
+                2: { name: '', q1: null, q2: null, horses: {} }
             }
         };
 
@@ -587,7 +593,7 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed.races) {
-                        for (let i = 1; i <= 10; i++) {
+                        for (let i = 1; i <= 2; i++) {
                             if (parsed.races[i]) {
                                 if (typeof parsed.races[i] === 'object' && parsed.races[i].horses !== undefined) {
                                     state.races[i] = {
@@ -602,7 +608,7 @@
                             }
                         }
                     }
-                    if (parsed.currentRace && parsed.currentRace <= 10) {
+                    if (parsed.currentRace && parsed.currentRace <= 2) {
                         state.currentRace = parsed.currentRace;
                     }
                     if (parsed.selectedMark) {
@@ -687,10 +693,10 @@
         }
 
         function updateUI() {
-            // タブの描画 (1〜10)
+            // タブの描画 (1〜2)
             const tabsContainer = document.getElementById('raceTabs');
             tabsContainer.innerHTML = '';
-            for (let r = 1; r <= 10; r++) {
+            for (let r = 1; r <= 2; r++) {
                 const tab = document.createElement('div');
                 tab.className = `race-tab ${state.currentRace === r ? 'active' : ''}`;
                 
@@ -752,6 +758,9 @@
             document.getElementById('flowResultBox').innerText = flowResultText;
             document.getElementById('terminal').innerText = terminalText;
 
+            // 組み合わせ表示の更新
+            updateCombinations(currentRaceObj);
+
             // マーク選択パレットの活性状態更新
             const markButtons = document.querySelectorAll('.mark-select-btn');
             markButtons.forEach(btn => {
@@ -788,8 +797,96 @@
             }
         }
 
-        function copyToClipboard() {
-            const text = document.getElementById('terminal').innerText;
+        function updateCombinations(currentRaceObj) {
+            const combTerminal = document.getElementById('combTerminal');
+            const q1 = currentRaceObj.q1;
+            const q2 = currentRaceObj.q2;
+            const horses = currentRaceObj.horses || {};
+
+            let jiku = [];
+            let chuana = [];
+            let oana = [];
+
+            for (let num in horses) {
+                const type = horses[num];
+                const n = parseInt(num);
+                if (type === 'JIKU') jiku.push(n);
+                else if (type === 'CHUANA') chuana.push(n);
+                else if (type === 'OANA') oana.push(n);
+            }
+
+            let text = '';
+
+            if (q1 === 'yes' && q2 === 'yes') {
+                if (jiku.length === 1 && chuana.length === 2 && oana.length === 4) {
+                    text = generateSanrenpuku3(jiku, [...chuana, ...oana]);
+                } else {
+                    text = '>> [条件未達成] 軸1頭、中穴2頭、大穴4頭（計7頭）を選択してください。';
+                }
+            } else if (q1 === 'yes' && q2 === 'no') {
+                if (jiku.length === 1 && chuana.length === 3 && oana.length === 1) {
+                    text = generateSanrenpuku3(jiku, [...chuana, ...oana]);
+                } else {
+                    text = '>> [条件未達成] 軸1頭、中穴3頭、大穴1頭（計5頭）を選択してください。';
+                }
+            } else if (q1 === 'no' && q2 === 'yes') {
+                if (jiku.length === 2 && chuana.length === 5 && oana.length === 0) {
+                    text = generateSanrenpuku6(jiku, chuana);
+                } else {
+                    text = '>> [条件未達成] 軸2頭、中穴5頭（計7頭）を選択してください。';
+                }
+            } else if (q1 === 'no' && q2 === 'no') {
+                const total = jiku.length + chuana.length + oana.length;
+                if (total === 5) {
+                    text = generateBox([...jiku, ...chuana, ...oana], 3);
+                } else {
+                    text = '>> [条件未達成] 合計5頭を選択してください（3連複BOX）。';
+                }
+            } else {
+                text = '>> [STATUS] フロー①〜②を選択し、条件に合った馬を選択してください。';
+            }
+
+            combTerminal.innerText = text;
+        }
+
+        function generateSanrenpuku3(jikus, others) {
+            let results = [];
+            const j = jikus[0];
+            for (let i = 0; i < others.length; i++) {
+                for (let k = i + 1; k < others.length; k++) {
+                    results.push(`${j} - ${others[i]} - ${others[k]}`);
+                }
+            }
+            return `[買い目一覧 (3連複軸1頭: 計${results.length}点)]\n` + results.join('\n');
+        }
+
+        function generateSanrenpuku6(jikus, others) {
+            let results = [];
+            const j1 = jikus[0];
+            const j2 = jikus[1];
+            for (let i = 0; i < others.length; i++) {
+                results.push(`${j1} - ${j2} - ${others[i]}`);
+            }
+            return `[買い目一覧 (3連複軸2頭: 計${results.length}点)]\n` + results.join('\n');
+        }
+
+        function generateBox(arr, r) {
+            let results = [];
+            function combine(start, temp) {
+                if (temp.length === r) {
+                    results.push(temp.join(' - '));
+                    return;
+                }
+                for (let i = start; i < arr.length; i++) {
+                    combine(i + 1, [...temp, arr[i]]);
+                }
+            }
+            combine(0, []);
+            return `[買い目一覧 (3連複BOX: 計${results.length}点)]\n` + results.join('\n');
+        }
+
+        function copyCombinations() {
+            const text = document.getElementById('combTerminal').innerText;
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text).then(() => showToast());
             } else {
@@ -812,14 +909,14 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
             let hasData = false;
-            for (let i = 1; i <= 10; i++) {
+            for (let i = 1; i <= 2; i++) {
                 if (Object.keys(state.races[i].horses || {}).length > 0 || state.races[i].name || state.races[i].q1 !== null) {
                     hasData = true;
                     break;
                 }
             }
             if (!hasData) {
-                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA' } };
+                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA', 13: 'OANA', 14: 'OANA', 15: 'OANA' } };
             }
             updateUI();
         });
