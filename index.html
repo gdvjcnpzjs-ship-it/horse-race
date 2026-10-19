@@ -493,18 +493,6 @@
                 <button class="btn-act btn-reset" onclick="resetSelections()" style="width: 100%;">リセット</button>
             </div>
         </div>
-
-        <!-- [4] BET COMBINATIONS -->
-        <div class="panel">
-            <div class="panel-title">
-                <span>[4] BET COMBINATIONS</span>
-                <span style="font-size:0.65rem; color:var(--dim-green);">買い目一覧</span>
-            </div>
-            <div class="terminal" id="combTerminal">条件に合致する馬が選択されていません</div>
-            <div style="margin-top: 8px;">
-                <button class="btn-act" onclick="copyCombinations()" style="width: 100%;">買い目をコピー</button>
-            </div>
-        </div>
     </div>
 
     <div class="toast" id="toast">クリップボードにコピーしました</div>
@@ -799,6 +787,7 @@
 
         function updateCombinations(currentRaceObj) {
             const combTerminal = document.getElementById('combTerminal');
+            if (!combTerminal) return;
             const q1 = currentRaceObj.q1;
             const q2 = currentRaceObj.q2;
             const horses = currentRaceObj.horses || {};
@@ -886,7 +875,9 @@
         }
 
         function copyCombinations() {
-            const text = document.getElementById('combTerminal').innerText;
+            const combTerminal = document.getElementById('combTerminal');
+            if (!combTerminal) return;
+            const text = combTerminal.innerText;
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text).then(() => showToast());
             } else {
