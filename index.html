@@ -119,17 +119,15 @@
             padding-left: 6px;
         }
 
-        /* レース選択タブ */
+        /* レース選択タブ（2×2グリッド） */
         .race-tabs {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 6px;
-            overflow-x: auto;
             padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
         }
 
         .race-tab {
-            flex: 1 1 0%;
             background: var(--dark-green);
             border: 1px solid var(--dim-green);
             color: var(--dim-green);
@@ -173,64 +171,52 @@
             border-color: var(--main-green);
         }
 
-        /* 購入フロー判定UI */
-        .flow-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 0.78rem;
-        }
-
-        .flow-question {
-            background: rgba(0,0,0,0.5);
-            border: 1px dashed var(--dim-green);
-            padding: 8px;
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .flow-question-text {
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .flow-options {
+        /* レース基礎情報フォーム（コンパクト配置） */
+        .race-info-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(4, 1fr);
             gap: 6px;
+            font-size: 0.72rem;
         }
 
-        .flow-btn {
-            background: var(--dark-green);
+        .race-info-item {
+            background: rgba(0, 0, 0, 0.55);
             border: 1px solid var(--dim-green);
+            border-radius: 5px;
+            padding: 5px 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .race-info-item.span-2 {
+            grid-column: span 2;
+        }
+
+        .race-info-label {
+            font-size: 0.62rem;
             color: var(--dim-green);
-            padding: 6px;
-            font-size: 0.75rem;
-            border-radius: 4px;
-            text-align: center;
-            cursor: pointer;
             font-weight: bold;
+            line-height: 1.1;
         }
 
-        .flow-btn.active {
-            background: var(--main-green);
-            border-color: var(--main-green);
-            color: #000;
-            box-shadow: 0 0 6px var(--main-green);
-        }
-
-        .flow-result-box {
+        .race-info-input,
+        .race-info-select {
+            width: 100%;
             background: #000;
-            border: 1px solid var(--main-green);
-            padding: 8px;
-            border-radius: 6px;
+            border: 1px solid var(--dim-green);
             color: var(--main-green);
+            border-radius: 4px;
+            padding: 3px 5px;
+            font-size: 0.72rem;
             font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-align: center;
+            outline: none;
+        }
+
+        .race-info-input:focus,
+        .race-info-select:focus {
+            border-color: var(--main-green);
+            box-shadow: 0 0 5px rgba(0, 255, 102, 0.35);
         }
 
         /* 付与マーク選択パレット */
@@ -348,22 +334,6 @@
         .horse-btn[data-type="EXCLUDE"] .horse-num,
         .horse-btn[data-type="EXCLUDE"] .horse-badge { color: #aaaaaa; }
 
-        /* ターミナル出力 */
-        .terminal {
-            background: #000;
-            border: 1px solid var(--main-green);
-            border-radius: 6px;
-            padding: 10px;
-            font-size: 0.75rem;
-            line-height: 1.45;
-            max-height: 280px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
-            box-shadow: inset 0 0 8px rgba(0, 255, 102, 0.2);
-            font-family: 'Courier New', monospace;
-        }
-
         .action-btns {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -436,40 +406,63 @@
             <div class="race-tabs" id="raceTabs"></div>
         </div>
 
-        <!-- [1] BET FLOW LOGIC -->
-        <div class="panel">
-            <div class="panel-title">
-                <span>[1] BET FLOW LOGIC</span>
-                <span style="font-size:0.65rem; color:var(--dim-green);">条件分岐フロー</span>
+        <!-- レース基礎情報 -->
+        <div class="panel" style="padding: 10px 12px;">
+            <div class="panel-title" style="margin-bottom: 6px;">
+                <span>[RACE INFO]</span>
+                <span style="font-size:0.65rem; color:var(--dim-green);">レース基礎情報</span>
             </div>
-
-            <div class="flow-section">
-                <div class="flow-question" id="q1Box">
-                    <div class="flow-question-text">① 1着の確実が予測できるか？</div>
-                    <div class="flow-options">
-                        <div class="flow-btn" id="q1-yes" onclick="setFlowQ1('yes')">はい (YES)</div>
-                        <div class="flow-btn" id="q1-no" onclick="setFlowQ1('no')">いいえ (NO)</div>
-                    </div>
+            <div class="race-info-grid">
+                <div class="race-info-item">
+                    <label class="race-info-label" for="infoRound">開催ラウンド数</label>
+                    <input type="text" id="infoRound" class="race-info-input" placeholder="例: 1R" oninput="updateRaceInfo('round', this.value)">
                 </div>
-
-                <div class="flow-question" id="q2Box" style="display:none;">
-                    <div class="flow-question-text" id="q2Text">② 2着が2頭に絞れるか？</div>
-                    <div class="flow-options">
-                        <div class="flow-btn" id="q2-yes" onclick="setFlowQ2('yes')">はい (YES)</div>
-                        <div class="flow-btn" id="q2-no" onclick="setFlowQ2('no')">いいえ (NO)</div>
-                    </div>
+                <div class="race-info-item">
+                    <label class="race-info-label" for="infoTurn">回り</label>
+                    <select id="infoTurn" class="race-info-select" onchange="updateRaceInfo('turn', this.value)">
+                        <option value="">選択</option>
+                        <option value="右回り">右回り</option>
+                        <option value="左回り">左回り</option>
+                    </select>
                 </div>
-
-                <div class="flow-result-box" id="flowResultBox">
-                    判定: フローを選択してください
+                <div class="race-info-item">
+                    <label class="race-info-label" for="infoDistance">距離</label>
+                    <input type="text" id="infoDistance" class="race-info-input" placeholder="例: 1600m" oninput="updateRaceInfo('distance', this.value)">
+                </div>
+                <div class="race-info-item">
+                    <label class="race-info-label" for="infoWeightType">斤量</label>
+                    <select id="infoWeightType" class="race-info-select" onchange="updateRaceInfo('weightType', this.value)">
+                        <option value="">選択</option>
+                        <option value="定量">定量</option>
+                        <option value="別定">別定</option>
+                        <option value="ハンデ">ハンデ</option>
+                    </select>
+                </div>
+                <div class="race-info-item">
+                    <label class="race-info-label" for="infoTrack">馬場</label>
+                    <select id="infoTrack" class="race-info-select" onchange="updateRaceInfo('track', this.value)">
+                        <option value="">選択</option>
+                        <option value="良">良</option>
+                        <option value="稍重">稍重</option>
+                        <option value="重">重</option>
+                        <option value="不良">不良</option>
+                    </select>
+                </div>
+                <div class="race-info-item">
+                    <label class="race-info-label" for="infoSeason">季節</label>
+                    <select id="infoSeason" class="race-info-select" onchange="updateRaceInfo('season', this.value)">
+                        <option value="">選択</option>
+                        <option value="春">春</option>
+                        <option value="夏">夏</option>
+                        <option value="秋">秋</option>
+                        <option value="冬">冬</option>
+                    </select>
+                </div>
+                <div class="race-info-item span-2">
+                    <label class="race-info-label" for="infoTemp">気温</label>
+                    <input type="text" id="infoTemp" class="race-info-input" placeholder="例: 20℃" oninput="updateRaceInfo('temp', this.value)">
                 </div>
             </div>
-        </div>
-
-        <!-- [2] OUTPUT TERMINAL -->
-        <div class="panel">
-            <div class="panel-title">[2] OUTPUT TERMINAL</div>
-            <div class="terminal" id="terminal"></div>
         </div>
 
         <!-- [3] SELECT HORSES -->
@@ -529,7 +522,7 @@
                 }
             };
 
-            horseImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAMAAAAvK2D7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF////00003Uf3eAAAAMElEQVR42u3XQQqAMBAEwSj+/83DgxB8wToIup302k3Nmtda+952932e53mvh18mCwoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgr/C34mO3me53me53me53n/3AM4a1/vXwFvTAAAAABJRU5ErkJggg==';
+            horseImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAMAAAAvK2D7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF////00003Uf3eAAAAMElEQVR42u3XQQqAMBAEwSj+/83DgxB8wToIup302k3Nmtda+952932e53mvh18mCwoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgr/C34mO3me53me53me53n/3AM4a1/vXwFvTAAAAABJRU5ErkJggg==';
         })();
 
         // --- 2. 背景 Matrix Digital Rain ---
@@ -566,12 +559,36 @@
         setInterval(drawMatrix, 40);
 
         // --- 3. アプリケーション状態 & 構成 ---
+        function createDefaultRaceInfo() {
+            return {
+                round: '',
+                turn: '',
+                distance: '',
+                weightType: '',
+                track: '',
+                season: '',
+                temp: ''
+            };
+        }
+
+        function createDefaultRaceObj() {
+            return {
+                name: '',
+                q1: null,
+                q2: null,
+                horses: {},
+                info: createDefaultRaceInfo()
+            };
+        }
+
         let state = {
             currentRace: 1,
             selectedMark: 'JIKU',
             races: {
-                1: { name: '', q1: null, q2: null, horses: {} },
-                2: { name: '', q1: null, q2: null, horses: {} }
+                1: createDefaultRaceObj(),
+                2: createDefaultRaceObj(),
+                3: createDefaultRaceObj(),
+                4: createDefaultRaceObj()
             }
         };
 
@@ -581,22 +598,29 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed.races) {
-                        for (let i = 1; i <= 2; i++) {
+                        for (let i = 1; i <= 4; i++) {
                             if (parsed.races[i]) {
                                 if (typeof parsed.races[i] === 'object' && parsed.races[i].horses !== undefined) {
                                     state.races[i] = {
                                         name: parsed.races[i].name || '',
                                         q1: parsed.races[i].q1 !== undefined ? parsed.races[i].q1 : null,
                                         q2: parsed.races[i].q2 !== undefined ? parsed.races[i].q2 : null,
-                                        horses: parsed.races[i].horses || {}
+                                        horses: parsed.races[i].horses || {},
+                                        info: Object.assign(createDefaultRaceInfo(), parsed.races[i].info || {})
                                     };
                                 } else {
-                                    state.races[i] = { name: '', q1: null, q2: null, horses: parsed.races[i] || {} };
+                                    state.races[i] = {
+                                        name: '',
+                                        q1: null,
+                                        q2: null,
+                                        horses: parsed.races[i] || {},
+                                        info: createDefaultRaceInfo()
+                                    };
                                 }
                             }
                         }
                     }
-                    if (parsed.currentRace && parsed.currentRace <= 2) {
+                    if (parsed.currentRace && parsed.currentRace <= 4) {
                         state.currentRace = parsed.currentRace;
                     }
                     if (parsed.selectedMark) {
@@ -630,9 +654,20 @@
 
         function updateRaceName(raceNum, name) {
             if (!state.races[raceNum]) {
-                state.races[raceNum] = { name: '', q1: null, q2: null, horses: {} };
+                state.races[raceNum] = createDefaultRaceObj();
             }
             state.races[raceNum].name = name;
+            saveState();
+        }
+
+        function updateRaceInfo(field, value) {
+            if (!state.races[state.currentRace]) {
+                state.races[state.currentRace] = createDefaultRaceObj();
+            }
+            if (!state.races[state.currentRace].info) {
+                state.races[state.currentRace].info = createDefaultRaceInfo();
+            }
+            state.races[state.currentRace].info[field] = value;
             saveState();
         }
 
@@ -653,7 +688,7 @@
 
         function toggleHorse(num) {
             if (!state.races[state.currentRace]) {
-                state.races[state.currentRace] = { name: '', q1: null, q2: null, horses: {} };
+                state.races[state.currentRace] = createDefaultRaceObj();
             }
             const currentRaceObj = state.races[state.currentRace];
             const horses = currentRaceObj.horses || {};
@@ -675,20 +710,21 @@
                 state.races[state.currentRace].horses = {};
                 state.races[state.currentRace].q1 = null;
                 state.races[state.currentRace].q2 = null;
+                state.races[state.currentRace].info = createDefaultRaceInfo();
             }
             updateUI();
             saveState();
         }
 
         function updateUI() {
-            // タブの描画 (1〜2)
+            // タブの描画 (1〜4)
             const tabsContainer = document.getElementById('raceTabs');
             tabsContainer.innerHTML = '';
-            for (let r = 1; r <= 2; r++) {
+            for (let r = 1; r <= 4; r++) {
                 const tab = document.createElement('div');
                 tab.className = `race-tab ${state.currentRace === r ? 'active' : ''}`;
                 
-                const raceData = state.races[r] || { name: '', q1: null, q2: null, horses: {} };
+                const raceData = state.races[r] || createDefaultRaceObj();
                 
                 tab.innerHTML = `
                     <span class="race-tab-num">${r}</span>
@@ -698,53 +734,16 @@
                 tabsContainer.appendChild(tab);
             }
 
-            // フロー状態の反映
-            const currentRaceObj = state.races[state.currentRace] || { name: '', q1: null, q2: null, horses: {} };
-            const q1Yes = document.getElementById('q1-yes');
-            const q1No = document.getElementById('q1-no');
-            q1Yes.className = `flow-btn ${currentRaceObj.q1 === 'yes' ? 'active' : ''}`;
-            q1No.className = `flow-btn ${currentRaceObj.q1 === 'no' ? 'active' : ''}`;
-
-            const q2Box = document.getElementById('q2Box');
-            const q2Text = document.getElementById('q2Text');
-            const q2Yes = document.getElementById('q2-yes');
-            const q2No = document.getElementById('q2-no');
-
-            if (currentRaceObj.q1 !== null) {
-                q2Box.style.display = 'flex';
-                if (currentRaceObj.q1 === 'yes') {
-                    q2Text.innerText = '② 2着が2頭に絞れるか？';
-                } else {
-                    q2Text.innerText = '⑤ 1着・2着の軸になりそうな2頭がいるか？';
-                }
-                q2Yes.className = `flow-btn ${currentRaceObj.q2 === 'yes' ? 'active' : ''}`;
-                q2No.className = `flow-btn ${currentRaceObj.q2 === 'no' ? 'active' : ''}`;
-            } else {
-                q2Box.style.display = 'none';
-            }
-
-            // フロー判定結果とターミナル出力の生成
-            let flowResultText = '判定: フローを選択してください';
-            let terminalText = '';
-
-            if (currentRaceObj.q1 === 'yes' && currentRaceObj.q2 === 'yes') {
-                flowResultText = '③ ③フロー該当 (10点)';
-                terminalText = '>>> 買い方指示フロー ③ <<<\n- 条件: 1着確実予測あり、2着2頭に絞れる\n- 指示: 7頭を選び、1（軸）-2（中穴）-2（中穴）+4（大穴）で購入 (10点)\n';
-            } else if (currentRaceObj.q1 === 'yes' && currentRaceObj.q2 === 'no') {
-                flowResultText = '④ ④フロー該当 (9点)';
-                terminalText = '>>> 買い方指示フロー ④ <<<\n- 条件: 1着確実予測あり、2着2頭に絞れない\n- 指示: 5頭を選び、1（軸）-3（中穴）-3（中穴）+1（大穴）で購入 (9点)\n';
-            } else if (currentRaceObj.q1 === 'no' && currentRaceObj.q2 === 'yes') {
-                flowResultText = '⑥ ⑥フロー該当 (10点)';
-                terminalText = '>>> 買い方指示フロー ⑥ <<<\n- 条件: 1着確実予測なし、軸になりそうな2頭あり\n- 指示: 計7頭選び、2（軸）-2（軸）-5（中穴）で購入 (10点)\n';
-            } else if (currentRaceObj.q1 === 'no' && currentRaceObj.q2 === 'no') {
-                flowResultText = '⑦ ⑦フロー該当 (10点)';
-                terminalText = '>>> 買い方指示フロー ⑦ <<<\n- 条件: 1着確実予測なし、軸になりそうな2頭なし\n- 指示: 計5頭選び、3連複のBOX購入 (10点)\n';
-            } else {
-                terminalText = '>> [STATUS] 買い方フローの質問①〜②に回答してください。';
-            }
-
-            document.getElementById('flowResultBox').innerText = flowResultText;
-            document.getElementById('terminal').innerText = terminalText;
+            // レース基礎情報の反映
+            const currentRaceObj = state.races[state.currentRace] || createDefaultRaceObj();
+            const raceInfo = Object.assign(createDefaultRaceInfo(), currentRaceObj.info || {});
+            document.getElementById('infoRound').value = raceInfo.round;
+            document.getElementById('infoTurn').value = raceInfo.turn;
+            document.getElementById('infoDistance').value = raceInfo.distance;
+            document.getElementById('infoWeightType').value = raceInfo.weightType;
+            document.getElementById('infoTrack').value = raceInfo.track;
+            document.getElementById('infoSeason').value = raceInfo.season;
+            document.getElementById('infoTemp').value = raceInfo.temp;
 
             // 組み合わせ表示の更新
             updateCombinations(currentRaceObj);
@@ -900,14 +899,14 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
             let hasData = false;
-            for (let i = 1; i <= 2; i++) {
+            for (let i = 1; i <= 4; i++) {
                 if (Object.keys(state.races[i].horses || {}).length > 0 || state.races[i].name || state.races[i].q1 !== null) {
                     hasData = true;
                     break;
                 }
             }
             if (!hasData) {
-                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA', 13: 'OANA', 14: 'OANA', 15: 'OANA' } };
+                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA', 13: 'OANA', 14: 'OANA', 15: 'OANA' }, info: createDefaultRaceInfo() };
             }
             updateUI();
         });
