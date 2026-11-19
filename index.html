@@ -414,6 +414,15 @@
             </div>
             <div class="race-info-grid">
                 <div class="race-info-item">
+                    <label class="race-info-label" for="infoVenue">開催場</label>
+                    <select id="infoVenue" class="race-info-select" onchange="updateRaceInfo('venue', this.value)">
+                        <option value="">選択</option>
+                        <option value="東京">東京</option>
+                        <option value="中山">中山</option>
+                        <option value="京都">京都</option>
+                    </select>
+                </div>
+                <div class="race-info-item">
                     <label class="race-info-label" for="infoRound">開催ラウンド数</label>
                     <input type="text" id="infoRound" class="race-info-input" placeholder="例: 1R" oninput="updateRaceInfo('round', this.value)">
                 </div>
@@ -458,7 +467,7 @@
                         <option value="冬">冬</option>
                     </select>
                 </div>
-                <div class="race-info-item span-2">
+                <div class="race-info-item">
                     <label class="race-info-label" for="infoTemp">気温</label>
                     <input type="text" id="infoTemp" class="race-info-input" placeholder="例: 20℃" oninput="updateRaceInfo('temp', this.value)">
                 </div>
@@ -561,6 +570,7 @@
         // --- 3. アプリケーション状態 & 構成 ---
         function createDefaultRaceInfo() {
             return {
+                venue: '',
                 round: '',
                 turn: '',
                 distance: '',
@@ -737,6 +747,7 @@
             // レース基礎情報の反映
             const currentRaceObj = state.races[state.currentRace] || createDefaultRaceObj();
             const raceInfo = Object.assign(createDefaultRaceInfo(), currentRaceObj.info || {});
+            document.getElementById('infoVenue').value = raceInfo.venue;
             document.getElementById('infoRound').value = raceInfo.round;
             document.getElementById('infoTurn').value = raceInfo.turn;
             document.getElementById('infoDistance').value = raceInfo.distance;
