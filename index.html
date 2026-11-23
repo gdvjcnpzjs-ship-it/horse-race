@@ -215,7 +215,7 @@
 
         .race-info-memo {
             width: 100%;
-            min-height: 46px;
+            min-height: 138px;
             background: #000;
             border: 1px dashed var(--dim-green);
             color: var(--main-green);
@@ -441,7 +441,7 @@
                         <option value="先行有利＋１">先行有利＋１</option>
                         <option value="先行有利＋２">先行有利＋２</option>
                     </select>
-                    <textarea id="infoCourseMemo" class="race-info-memo" rows="2" placeholder="判定要素メモ" oninput="updateRaceInfo('courseMemo', this.value)"></textarea>
+                    <textarea id="infoCourseMemo" class="race-info-memo" rows="6" placeholder="判定要素メモ" oninput="updateRaceInfo('courseMemo', this.value)"></textarea>
                 </div>
                 <div class="race-info-item">
                     <label class="race-info-label" for="infoPace">②ペース判定</label>
@@ -453,7 +453,7 @@
                         <option value="ハイ＋１">ハイ＋１</option>
                         <option value="ハイ＋２">ハイ＋２</option>
                     </select>
-                    <textarea id="infoPaceMemo" class="race-info-memo" rows="2" placeholder="判定要素メモ" oninput="updateRaceInfo('paceMemo', this.value)"></textarea>
+                    <textarea id="infoPaceMemo" class="race-info-memo" rows="6" placeholder="判定要素メモ" oninput="updateRaceInfo('paceMemo', this.value)"></textarea>
                 </div>
                 <div class="race-info-item span-2" style="flex-direction: row; align-items: center; gap: 8px;">
                     <label class="race-info-label" for="infoWeightType" style="white-space: nowrap;">③斤量</label>
@@ -503,6 +503,7 @@
             EXCLUDE: '×'
         };
         const INFO_FIELDS = ['course', 'courseMemo', 'pace', 'paceMemo', 'weightType'];
+        const SHARED_MEMO_FIELDS = ['courseMemo', 'paceMemo'];
 
         // --- 1. Apple Touch Icon (180x180 PNG Canvas) 動的生成 ---
         (function generateIcon() {
@@ -585,13 +586,18 @@
         setInterval(drawMatrix, 40);
 
         // --- 3. アプリケーション状態 & 構成 ---
-        function createDefaultRaceInfo(preservedMemo = {}) {
+        function createDefaultRaceInfo() {
             return {
                 course: '',
-                courseMemo: preservedMemo.courseMemo || '',
                 pace: '',
-                paceMemo: preservedMemo.paceMemo || '',
                 weightType: ''
+            };
+        }
+
+        function createDefaultSharedMemo() {
+            return {
+                courseMemo: '',
+                paceMemo: ''
             };
         }
 
@@ -616,6 +622,7 @@
         let state = {
             currentRace: 1,
             selectedMark: 'JIKU',
+            sharedMemo: createDefaultSharedMemo(),
             races: createInitialRaces()
         };
 
@@ -642,18 +649,35 @@
                 if (!saved) return;
 
                 const parsed = JSON.parse(saved);
+                if (parsed.sharedMemo) {
+                    state.sharedMemo = Object.assign(createDefaultSharedMemo(), parsed.sharedMemo);
+                }
+
                 if (parsed.races) {
                     for (let i = 1; i <= RACE_COUNT; i++) {
                         const rawRace = parsed.races[i];
                         if (!rawRace) continue;
 
                         if (typeof rawRace === 'object' && rawRace.horses !== undefined) {
+                            const rawInfo = rawRace.info || {};
+                            if (!parsed.sharedMemo) {
+                                if (rawInfo.courseMemo && !state.sharedMemo.courseMemo) {
+                                    state.sharedMemo.courseMemo = rawInfo.courseMemo;
+                                }
+                                if (rawInfo.paceMemo && !state.sharedMemo.paceMemo) {
+                                    state.sharedMemo.paceMemo = rawInfo.paceMemo;
+                                }
+                            }
                             state.races[i] = {
                                 name: rawRace.name || '',
                                 q1: rawRace.q1 !== undefined ? rawRace.q1 : null,
                                 q2: rawRace.q2 !== undefined ? rawRace.q2 : null,
                                 horses: rawRace.horses || {},
-                                info: Object.assign(createDefaultRaceInfo(), rawRace.info || {})
+                                info: {
+                                    course: rawInfo.course || '',
+                                    pace: rawInfo.pace || '',
+                                    weightType: rawInfo.weightType || ''
+                                }
                             };
                         } else {
                             state.races[i] = {
@@ -706,6 +730,14 @@
         }
 
         function updateRaceInfo(field, value) {
+            if (SHARED_MEMO_FIELDS.includes(field)) {
+                if (!state.sharedMemo) {
+                    state.sharedMemo = createDefaultSharedMemo();
+                }
+                state.sharedMemo[field] = value;
+                saveState();
+                return;
+            }
             const raceObj = getCurrentRaceObj();
             if (!raceObj.info) {
                 raceObj.info = createDefaultRaceInfo();
@@ -751,16 +783,11 @@
 
         function resetSelections() {
             const raceObj = getCurrentRaceObj();
-            const currentInfo = raceObj.info || {};
-            const preservedMemo = {
-                courseMemo: currentInfo.courseMemo || '',
-                paceMemo: currentInfo.paceMemo || ''
-            };
             raceObj.name = '';
             raceObj.horses = {};
             raceObj.q1 = null;
             raceObj.q2 = null;
-            raceObj.info = createDefaultRaceInfo(preservedMemo);
+            raceObj.info = createDefaultRaceInfo();
             updateUI();
             saveState();
         }
@@ -846,11 +873,14 @@
 
         function updateRaceInfoUI(currentRaceObj) {
             const raceInfo = Object.assign(createDefaultRaceInfo(), currentRaceObj.info || {});
+            const sharedMemo = Object.assign(createDefaultSharedMemo(), state.sharedMemo || {});
+            const mergedInfo = Object.assign({}, raceInfo, sharedMemo);
+
             for (let i = 0; i < INFO_FIELDS.length; i++) {
                 const field = INFO_FIELDS[i];
                 const el = domRefs.infoInputs[field];
-                if (el && el.value !== raceInfo[field]) {
-                    el.value = raceInfo[field];
+                if (el && el.value !== mergedInfo[field]) {
+                    el.value = mergedInfo[field];
                 }
             }
         }
