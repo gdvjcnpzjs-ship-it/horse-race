@@ -291,7 +291,7 @@
             box-shadow: 0 0 6px #888888;
         }
 
-        /* 馬番縦長（1×12）行リスト＆右隣5択・脚質 */
+        /* 馬番縦長（1×18）行リスト＆右隣5択・脚質 */
         .horse-grid {
             display: flex;
             flex-direction: column;
@@ -564,7 +564,7 @@
     <script>
         const STORAGE_KEY = 'matrix_horse_bet_state';
         const RACE_COUNT = 4;
-        const HORSE_COUNT = 12;
+        const HORSE_COUNT = 18;
         const MARK_OPTIONS = [
             { key: 'KOHO', label: '候補', badge: '候' },
             { key: 'JIKU', label: '軸', badge: '軸' },
@@ -942,7 +942,7 @@
             }
             domRefs.raceTabs.appendChild(tabFragment);
 
-            // 馬番縦長（1×12）行リスト（1〜12）を初回のみ生成
+            // 馬番縦長（1×18）行リスト（1〜18）を初回のみ生成
             const horseFragment = document.createDocumentFragment();
             domRefs.horseButtons = new Array(HORSE_COUNT + 1);
             for (let i = 1; i <= HORSE_COUNT; i++) {
@@ -1216,7 +1216,7 @@
                 }
             }
             if (!hasData) {
-                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'HIMO', 8: 'HIMO', 12: 'OANA' }, styles: {}, info: createDefaultRaceInfo() };
+                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'HIMO', 8: 'HIMO', 12: 'OANA', 13: 'OANA', 14: 'OANA', 15: 'OANA' }, styles: {}, info: createDefaultRaceInfo() };
             }
             updateUI();
         });
