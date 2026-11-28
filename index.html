@@ -239,8 +239,8 @@
         /* 付与マーク選択パレット */
         .mark-selector {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
             margin-bottom: 5px;
         }
 
@@ -248,12 +248,19 @@
             background: var(--dark-green);
             border: 1px solid var(--dim-green);
             color: var(--dim-green);
-            padding: 4px 3px;
-            font-size: 0.7rem;
+            padding: 4px 2px;
+            font-size: 0.66rem;
             font-weight: bold;
             border-radius: 5px;
             text-align: center;
             cursor: pointer;
+        }
+
+        .mark-select-btn.active[data-mark="KOHO"] {
+            border-color: #00ff66;
+            background: rgba(0, 255, 102, 0.22);
+            color: #00ff66;
+            box-shadow: 0 0 6px #00ff66;
         }
 
         .mark-select-btn.active[data-mark="JIKU"] {
@@ -263,7 +270,7 @@
             box-shadow: 0 0 6px var(--jiku-color);
         }
 
-        .mark-select-btn.active[data-mark="CHUANA"] {
+        .mark-select-btn.active[data-mark="HIMO"] {
             border-color: var(--chuana-color);
             background: rgba(255, 170, 0, 0.25);
             color: var(--chuana-color);
@@ -284,19 +291,31 @@
             box-shadow: 0 0 6px #888888;
         }
 
-        /* 馬番トグルグリッド */
+        /* 馬番縦長（1×12）行リスト＆右隣5択・脚質 */
         .horse-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            display: flex;
+            flex-direction: column;
             gap: 4px;
-            margin-top: 3px;
+            margin-top: 4px;
+        }
+
+        .horse-row {
+            display: grid;
+            grid-template-columns: 36px 1fr 64px;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(0, 136, 51, 0.45);
+            border-radius: 5px;
+            padding: 3px 4px;
         }
 
         .horse-btn {
-            height: 36px;
+            height: 28px;
+            width: 36px;
             background: #000;
             border: 1px solid var(--dim-green);
-            border-radius: 5px;
+            border-radius: 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -306,19 +325,92 @@
         }
 
         .horse-num {
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: bold;
             color: #fff;
             font-family: 'Courier New', monospace;
-            line-height: 1.05;
+            line-height: 1;
         }
 
         .horse-badge {
-            font-size: 0.55rem;
-            font-weight: bold;
-            line-height: 1;
-            margin-top: 1px;
+            display: none;
         }
+
+        .horse-choice-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+        }
+
+        .horse-choice-btn {
+            height: 26px;
+            background: #050a05;
+            border: 1px solid var(--dim-green);
+            color: var(--dim-green);
+            border-radius: 4px;
+            font-size: 0.58rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1px;
+            white-space: nowrap;
+        }
+
+        .horse-choice-btn.active[data-choice="KOHO"] {
+            border-color: #00ff66;
+            background: rgba(0, 255, 102, 0.25);
+            color: #00ff66;
+        }
+
+        .horse-choice-btn.active[data-choice="JIKU"] {
+            border-color: var(--jiku-color);
+            background: rgba(255, 51, 102, 0.28);
+            color: var(--jiku-color);
+        }
+
+        .horse-choice-btn.active[data-choice="HIMO"] {
+            border-color: var(--chuana-color);
+            background: rgba(255, 170, 0, 0.28);
+            color: var(--chuana-color);
+        }
+
+        .horse-choice-btn.active[data-choice="OANA"] {
+            border-color: var(--oana-color);
+            background: rgba(0, 204, 255, 0.28);
+            color: var(--oana-color);
+        }
+
+        .horse-choice-btn.active[data-choice="EXCLUDE"] {
+            border-color: #888888;
+            background: rgba(136, 136, 136, 0.28);
+            color: #cccccc;
+        }
+
+        .horse-style-select {
+            height: 26px;
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--dim-green);
+            color: var(--main-green);
+            border-radius: 4px;
+            font-size: 0.62rem;
+            font-family: var(--font-family);
+            padding: 0 2px;
+            outline: none;
+        }
+
+        .horse-style-select:focus {
+            border-color: var(--main-green);
+        }
+
+        .horse-btn[data-type="KOHO"] {
+            border-color: #00ff66;
+            background: rgba(0, 255, 102, 0.18);
+            box-shadow: 0 0 5px rgba(0, 255, 102, 0.6);
+        }
+        .horse-btn[data-type="KOHO"] .horse-num { color: #00ff66; }
 
         .horse-btn[data-type="JIKU"] {
             border-color: var(--jiku-color);
@@ -328,13 +420,13 @@
         .horse-btn[data-type="JIKU"] .horse-num,
         .horse-btn[data-type="JIKU"] .horse-badge { color: var(--jiku-color); }
 
-        .horse-btn[data-type="CHUANA"] {
+        .horse-btn[data-type="HIMO"] {
             border-color: var(--chuana-color);
             background: rgba(255, 170, 0, 0.2);
             box-shadow: 0 0 6px var(--chuana-color);
         }
-        .horse-btn[data-type="CHUANA"] .horse-num,
-        .horse-btn[data-type="CHUANA"] .horse-badge { color: var(--chuana-color); }
+        .horse-btn[data-type="HIMO"] .horse-num,
+        .horse-btn[data-type="HIMO"] .horse-badge { color: var(--chuana-color); }
 
         .horse-btn[data-type="OANA"] {
             border-color: var(--oana-color);
@@ -431,30 +523,6 @@
                 <span style="font-size:0.6rem; color:var(--dim-green);">レース基礎情報</span>
             </div>
             <div class="race-info-grid">
-                <div class="race-info-item">
-                    <label class="race-info-label" for="infoCourse">①コース判定</label>
-                    <select id="infoCourse" class="race-info-select" onchange="updateRaceInfo('course', this.value)">
-                        <option value="">選択</option>
-                        <option value="差し有利＋２">差し有利＋２</option>
-                        <option value="差し有利＋１">差し有利＋１</option>
-                        <option value="フラット">フラット</option>
-                        <option value="先行有利＋１">先行有利＋１</option>
-                        <option value="先行有利＋２">先行有利＋２</option>
-                    </select>
-                    <textarea id="infoCourseMemo" class="race-info-memo" rows="6" placeholder="判定要素メモ" oninput="updateRaceInfo('courseMemo', this.value)"></textarea>
-                </div>
-                <div class="race-info-item">
-                    <label class="race-info-label" for="infoPace">②ペース判定</label>
-                    <select id="infoPace" class="race-info-select" onchange="updateRaceInfo('pace', this.value)">
-                        <option value="">選択</option>
-                        <option value="スロー＋２">スロー＋２</option>
-                        <option value="スロー＋１">スロー＋１</option>
-                        <option value="フラット">フラット</option>
-                        <option value="ハイ＋１">ハイ＋１</option>
-                        <option value="ハイ＋２">ハイ＋２</option>
-                    </select>
-                    <textarea id="infoPaceMemo" class="race-info-memo" rows="6" placeholder="判定要素メモ" oninput="updateRaceInfo('paceMemo', this.value)"></textarea>
-                </div>
                 <div class="race-info-item span-2" style="flex-direction: row; align-items: center; gap: 8px;">
                     <label class="race-info-label" for="infoWeightType" style="white-space: nowrap;">③斤量</label>
                     <select id="infoWeightType" class="race-info-select" onchange="updateRaceInfo('weightType', this.value)">
@@ -471,15 +539,16 @@
         <div class="panel">
             <div class="panel-title">
                 <span>[3] SELECT HORSES</span>
-                <span style="font-size:0.6rem; color:var(--dim-green);">マークを選んで馬番をタップ</span>
+                <span style="font-size:0.6rem; color:var(--dim-green);">枠番タップまたは右隣5択・脚質選択</span>
             </div>
             
             <!-- マーク選択パレット -->
             <div class="mark-selector" id="markSelector">
-                <div class="mark-select-btn active" data-mark="JIKU" onclick="setMark('JIKU')">軸</div>
-                <div class="mark-select-btn" data-mark="CHUANA" onclick="setMark('CHUANA')">中穴</div>
+                <div class="mark-select-btn active" data-mark="KOHO" onclick="setMark('KOHO')">候補</div>
+                <div class="mark-select-btn" data-mark="JIKU" onclick="setMark('JIKU')">軸</div>
+                <div class="mark-select-btn" data-mark="HIMO" onclick="setMark('HIMO')">ヒモ</div>
                 <div class="mark-select-btn" data-mark="OANA" onclick="setMark('OANA')">大穴</div>
-                <div class="mark-select-btn" data-mark="EXCLUDE" onclick="setMark('EXCLUDE')">消×</div>
+                <div class="mark-select-btn" data-mark="EXCLUDE" onclick="setMark('EXCLUDE')">消</div>
             </div>
 
             <div class="horse-grid" id="horseGrid"></div>
@@ -495,15 +564,24 @@
     <script>
         const STORAGE_KEY = 'matrix_horse_bet_state';
         const RACE_COUNT = 4;
-        const HORSE_COUNT = 18;
+        const HORSE_COUNT = 12;
+        const MARK_OPTIONS = [
+            { key: 'KOHO', label: '候補', badge: '候' },
+            { key: 'JIKU', label: '軸', badge: '軸' },
+            { key: 'HIMO', label: 'ヒモ', badge: '紐' },
+            { key: 'OANA', label: '大穴', badge: '大' },
+            { key: 'EXCLUDE', label: '消', badge: '消' }
+        ];
+        const RUNNING_STYLES = ['', '差し', '逃げ', '中間'];
         const MARK_BADGE_MAP = {
+            KOHO: '候',
             JIKU: '軸',
-            CHUANA: '中',
+            HIMO: '紐',
             OANA: '大',
-            EXCLUDE: '×'
+            EXCLUDE: '消'
         };
-        const INFO_FIELDS = ['course', 'courseMemo', 'pace', 'paceMemo', 'weightType'];
-        const SHARED_MEMO_FIELDS = ['courseMemo', 'paceMemo'];
+        const INFO_FIELDS = ['weightType'];
+        const SHARED_MEMO_FIELDS = [];
 
         // --- 1. Apple Touch Icon (180x180 PNG Canvas) 動的生成 ---
         (function generateIcon() {
@@ -588,17 +666,12 @@
         // --- 3. アプリケーション状態 & 構成 ---
         function createDefaultRaceInfo() {
             return {
-                course: '',
-                pace: '',
                 weightType: ''
             };
         }
 
         function createDefaultSharedMemo() {
-            return {
-                courseMemo: '',
-                paceMemo: ''
-            };
+            return {};
         }
 
         function createDefaultRaceObj() {
@@ -607,6 +680,7 @@
                 q1: null,
                 q2: null,
                 horses: {},
+                styles: {},
                 info: createDefaultRaceInfo()
             };
         }
@@ -621,7 +695,7 @@
 
         let state = {
             currentRace: 1,
-            selectedMark: 'JIKU',
+            selectedMark: 'KOHO',
             sharedMemo: createDefaultSharedMemo(),
             races: createInitialRaces()
         };
@@ -643,6 +717,13 @@
             return state.races[state.currentRace];
         }
 
+        function normalizeMarkKey(raw) {
+            if (!raw) return null;
+            if (raw === 'CHUANA') return 'HIMO';
+            if (MARK_BADGE_MAP[raw]) return raw;
+            return null;
+        }
+
         function loadState() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
@@ -660,31 +741,46 @@
 
                         if (typeof rawRace === 'object' && rawRace.horses !== undefined) {
                             const rawInfo = rawRace.info || {};
-                            if (!parsed.sharedMemo) {
-                                if (rawInfo.courseMemo && !state.sharedMemo.courseMemo) {
-                                    state.sharedMemo.courseMemo = rawInfo.courseMemo;
+                            const normalizedHorses = {};
+                            for (const k in (rawRace.horses || {})) {
+                                const n = parseInt(k, 10);
+                                if (n >= 1 && n <= HORSE_COUNT) {
+                                    const mk = normalizeMarkKey(rawRace.horses[k]);
+                                    if (mk) normalizedHorses[n] = mk;
                                 }
-                                if (rawInfo.paceMemo && !state.sharedMemo.paceMemo) {
-                                    state.sharedMemo.paceMemo = rawInfo.paceMemo;
+                            }
+                            const normalizedStyles = {};
+                            for (const s in (rawRace.styles || {})) {
+                                const sn = parseInt(s, 10);
+                                if (sn >= 1 && sn <= HORSE_COUNT && RUNNING_STYLES.includes(rawRace.styles[s])) {
+                                    normalizedStyles[sn] = rawRace.styles[s];
                                 }
                             }
                             state.races[i] = {
                                 name: rawRace.name || '',
                                 q1: rawRace.q1 !== undefined ? rawRace.q1 : null,
                                 q2: rawRace.q2 !== undefined ? rawRace.q2 : null,
-                                horses: rawRace.horses || {},
+                                horses: normalizedHorses,
+                                styles: normalizedStyles,
                                 info: {
-                                    course: rawInfo.course || '',
-                                    pace: rawInfo.pace || '',
                                     weightType: rawInfo.weightType || ''
                                 }
                             };
                         } else {
+                            const normalizedHorses = {};
+                            for (const k in (rawRace || {})) {
+                                const n = parseInt(k, 10);
+                                if (n >= 1 && n <= HORSE_COUNT) {
+                                    const mk = normalizeMarkKey(rawRace[k]);
+                                    if (mk) normalizedHorses[n] = mk;
+                                }
+                            }
                             state.races[i] = {
                                 name: '',
                                 q1: null,
                                 q2: null,
-                                horses: rawRace || {},
+                                horses: normalizedHorses,
+                                styles: {},
                                 info: createDefaultRaceInfo()
                             };
                         }
@@ -694,7 +790,8 @@
                     state.currentRace = parsed.currentRace;
                 }
                 if (parsed.selectedMark) {
-                    state.selectedMark = parsed.selectedMark;
+                    const normalizedMark = normalizeMarkKey(parsed.selectedMark);
+                    if (normalizedMark) state.selectedMark = normalizedMark;
                 }
             } catch (e) {
                 console.error(e);
@@ -761,14 +858,14 @@
             saveState();
         }
 
-        function toggleHorse(num) {
+        function assignHorseMark(num, targetMark) {
             const currentRaceObj = getCurrentRaceObj();
             if (!currentRaceObj.horses) {
                 currentRaceObj.horses = {};
             }
             const horses = currentRaceObj.horses;
             const current = horses[num] || 'NONE';
-            const nextType = current === state.selectedMark ? null : state.selectedMark;
+            const nextType = current === targetMark ? null : targetMark;
 
             if (nextType === null) {
                 delete horses[num];
@@ -781,10 +878,28 @@
             saveState();
         }
 
+        function toggleHorse(num) {
+            assignHorseMark(num, state.selectedMark);
+        }
+
+        function updateHorseStyle(num, styleVal) {
+            const currentRaceObj = getCurrentRaceObj();
+            if (!currentRaceObj.styles) {
+                currentRaceObj.styles = {};
+            }
+            if (!styleVal) {
+                delete currentRaceObj.styles[num];
+            } else {
+                currentRaceObj.styles[num] = styleVal;
+            }
+            saveState();
+        }
+
         function resetSelections() {
             const raceObj = getCurrentRaceObj();
             raceObj.name = '';
             raceObj.horses = {};
+            raceObj.styles = {};
             raceObj.q1 = null;
             raceObj.q2 = null;
             raceObj.info = createDefaultRaceInfo();
@@ -827,10 +942,13 @@
             }
             domRefs.raceTabs.appendChild(tabFragment);
 
-            // 馬番グリッド（1〜18）を初回のみ生成
+            // 馬番縦長（1×12）行リスト（1〜12）を初回のみ生成
             const horseFragment = document.createDocumentFragment();
             domRefs.horseButtons = new Array(HORSE_COUNT + 1);
             for (let i = 1; i <= HORSE_COUNT; i++) {
+                const row = document.createElement('div');
+                row.className = 'horse-row';
+
                 const btn = document.createElement('div');
                 btn.className = 'horse-btn';
                 btn.setAttribute('data-type', 'NONE');
@@ -845,11 +963,49 @@
 
                 btn.appendChild(numDiv);
                 btn.appendChild(badgeDiv);
-                horseFragment.appendChild(btn);
+
+                const choiceGroup = document.createElement('div');
+                choiceGroup.className = 'horse-choice-group';
+                const choiceButtons = {};
+
+                for (let m = 0; m < MARK_OPTIONS.length; m++) {
+                    const opt = MARK_OPTIONS[m];
+                    const cBtn = document.createElement('button');
+                    cBtn.type = 'button';
+                    cBtn.className = 'horse-choice-btn';
+                    cBtn.dataset.choice = opt.key;
+                    cBtn.textContent = opt.label;
+                    cBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        assignHorseMark(i, opt.key);
+                    });
+                    choiceGroup.appendChild(cBtn);
+                    choiceButtons[opt.key] = cBtn;
+                }
+
+                const styleSelect = document.createElement('select');
+                styleSelect.className = 'horse-style-select';
+                styleSelect.setAttribute('aria-label', `${i}番の脚質`);
+                for (let s = 0; s < RUNNING_STYLES.length; s++) {
+                    const st = RUNNING_STYLES[s];
+                    const optEl = document.createElement('option');
+                    optEl.value = st;
+                    optEl.textContent = st === '' ? '脚質' : st;
+                    styleSelect.appendChild(optEl);
+                }
+                styleSelect.addEventListener('change', (e) => updateHorseStyle(i, e.target.value));
+                styleSelect.addEventListener('click', (e) => e.stopPropagation());
+
+                row.appendChild(btn);
+                row.appendChild(choiceGroup);
+                row.appendChild(styleSelect);
+                horseFragment.appendChild(row);
 
                 domRefs.horseButtons[i] = {
                     el: btn,
-                    badgeEl: badgeDiv
+                    badgeEl: badgeDiv,
+                    choiceButtons: choiceButtons,
+                    styleSelect: styleSelect
                 };
             }
             domRefs.horseGrid.appendChild(horseFragment);
@@ -897,11 +1053,24 @@
             if (!item) return;
             item.el.setAttribute('data-type', type);
             item.badgeEl.textContent = MARK_BADGE_MAP[type] || '';
+            if (item.choiceButtons) {
+                for (const key in item.choiceButtons) {
+                    item.choiceButtons[key].classList.toggle('active', key === type);
+                }
+            }
         }
 
-        function updateHorseGridUI(currentHorses) {
+        function updateHorseGridUI(currentHorses, currentStyles) {
+            const stylesObj = currentStyles || {};
             for (let i = 1; i <= HORSE_COUNT; i++) {
                 updateHorseButtonUI(i, currentHorses[i] || 'NONE');
+                const item = domRefs.horseButtons[i];
+                if (item && item.styleSelect) {
+                    const nextStyle = stylesObj[i] || '';
+                    if (item.styleSelect.value !== nextStyle) {
+                        item.styleSelect.value = nextStyle;
+                    }
+                }
             }
         }
 
@@ -912,7 +1081,7 @@
             updateRaceInfoUI(currentRaceObj);
             updateCombinations(currentRaceObj);
             updateMarkSelectorUI();
-            updateHorseGridUI(currentRaceObj.horses || {});
+            updateHorseGridUI(currentRaceObj.horses || {}, currentRaceObj.styles || {});
         }
 
         function updateCombinations(currentRaceObj) {
@@ -930,7 +1099,7 @@
                 const type = horses[num];
                 const n = parseInt(num, 10);
                 if (type === 'JIKU') jiku.push(n);
-                else if (type === 'CHUANA') chuana.push(n);
+                else if (type === 'HIMO') chuana.push(n);
                 else if (type === 'OANA') oana.push(n);
             }
 
@@ -940,19 +1109,19 @@
                 if (jiku.length === 1 && chuana.length === 2 && oana.length === 4) {
                     text = generateSanrenpuku3(jiku, chuana.concat(oana));
                 } else {
-                    text = '>> [条件未達成] 軸1頭、中穴2頭、大穴4頭（計7頭）を選択してください。';
+                    text = '>> [条件未達成] 軸1頭、ヒモ2頭、大穴4頭（計7頭）を選択してください。';
                 }
             } else if (q1 === 'yes' && q2 === 'no') {
                 if (jiku.length === 1 && chuana.length === 3 && oana.length === 1) {
                     text = generateSanrenpuku3(jiku, chuana.concat(oana));
                 } else {
-                    text = '>> [条件未達成] 軸1頭、中穴3頭、大穴1頭（計5頭）を選択してください。';
+                    text = '>> [条件未達成] 軸1頭、ヒモ3頭、大穴1頭（計5頭）を選択してください。';
                 }
             } else if (q1 === 'no' && q2 === 'yes') {
                 if (jiku.length === 2 && chuana.length === 5 && oana.length === 0) {
                     text = generateSanrenpuku6(jiku, chuana);
                 } else {
-                    text = '>> [条件未達成] 軸2頭、中穴5頭（計7頭）を選択してください。';
+                    text = '>> [条件未達成] 軸2頭、ヒモ5頭（計7頭）を選択してください。';
                 }
             } else if (q1 === 'no' && q2 === 'no') {
                 const total = jiku.length + chuana.length + oana.length;
@@ -1047,7 +1216,7 @@
                 }
             }
             if (!hasData) {
-                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'CHUANA', 8: 'CHUANA', 12: 'OANA', 13: 'OANA', 14: 'OANA', 15: 'OANA' }, info: createDefaultRaceInfo() };
+                state.races[1] = { name: '東京11R', q1: 'yes', q2: 'yes', horses: { 1: 'JIKU', 5: 'HIMO', 8: 'HIMO', 12: 'OANA' }, styles: {}, info: createDefaultRaceInfo() };
             }
             updateUI();
         });
