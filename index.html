@@ -236,6 +236,27 @@
             box-shadow: 0 0 5px rgba(0, 255, 102, 0.35);
         }
 
+        .style-stats-box {
+            width: 100%;
+            background: #000;
+            border: 1px dashed var(--dim-green);
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.64rem;
+            font-family: 'Courier New', monospace;
+            color: var(--main-green);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+
+        .style-stats-summary {
+            color: var(--dim-green);
+            font-size: 0.6rem;
+        }
+
         /* 付与マーク選択パレット */
         .mark-selector {
             display: grid;
@@ -532,6 +553,10 @@
                         <option value="ハンデ">ハンデ</option>
                     </select>
                 </div>
+                <div class="race-info-item span-2">
+                    <span class="race-info-label">脚質統計（候補〜大穴対象・消除外）</span>
+                    <div class="style-stats-box" id="styleStats">差し: 0頭 (0%) / 逃げ: 0頭 (0%) / 中間: 0頭 (0%)</div>
+                </div>
             </div>
         </div>
 
@@ -563,6 +588,7 @@
             { key: 'OANA', label: '大穴', badge: '大' },
             { key: 'EXCLUDE', label: '消', badge: '消' }
         ];
+        const STATS_TARGET_MARKS = ['KOHO', 'JIKU', 'HIMO', 'OANA'];
         const RUNNING_STYLES = ['', '差し', '逃げ', '中間'];
         const MARK_BADGE_MAP = {
             KOHO: '候',
@@ -697,7 +723,8 @@
             markButtons: null,
             horseGrid: null,
             horseButtons: [],
-            infoInputs: {}
+            infoInputs: {},
+            styleStats: null
         };
         let toastTimer = null;
 
@@ -865,6 +892,7 @@
             }
 
             updateHorseButtonUI(num, nextType || 'NONE');
+            updateStyleStatsUI(currentRaceObj);
             updateCombinations(currentRaceObj);
             saveState();
         }
@@ -883,6 +911,7 @@
             } else {
                 currentRaceObj.styles[num] = styleVal;
             }
+            updateStyleStatsUI(currentRaceObj);
             saveState();
         }
 
@@ -902,6 +931,7 @@
             domRefs.raceTabs = document.getElementById('raceTabs');
             domRefs.markButtons = Array.from(document.querySelectorAll('.mark-select-btn'));
             domRefs.horseGrid = document.getElementById('horseGrid');
+            domRefs.styleStats = document.getElementById('styleStats');
 
             INFO_FIELDS.forEach(field => {
                 const id = 'info' + field.charAt(0).toUpperCase() + field.slice(1);
@@ -1002,6 +1032,32 @@
             domRefs.horseGrid.appendChild(horseFragment);
         }
 
+        function updateStyleStatsUI(currentRaceObj) {
+            if (!domRefs.styleStats) return;
+            const horses = currentRaceObj.horses || {};
+            const styles = currentRaceObj.styles || {};
+            const counts = { '差し': 0, '逃げ': 0, '中間': 0 };
+            let targetCount = 0;
+            let styledTargetCount = 0;
+
+            for (let i = 1; i <= HORSE_COUNT; i++) {
+                const mark = horses[i];
+                if (STATS_TARGET_MARKS.includes(mark)) {
+                    targetCount++;
+                    const st = styles[i];
+                    if (st && Object.prototype.hasOwnProperty.call(counts, st)) {
+                        counts[st]++;
+                        styledTargetCount++;
+                    }
+                }
+            }
+
+            const formatRate = (cnt) => styledTargetCount > 0 ? Math.round((cnt / styledTargetCount) * 100) : 0;
+            const mainText = `差し: ${counts['差し']}頭 (${formatRate(counts['差し'])}%) / 逃げ: ${counts['逃げ']}頭 (${formatRate(counts['逃げ'])}%) / 中間: ${counts['中間']}頭 (${formatRate(counts['中間'])}%)`;
+            const subText = `<span class="style-stats-summary">[対象${targetCount}頭・脚質入力${styledTargetCount}頭]</span>`;
+            domRefs.styleStats.innerHTML = `<span>${mainText}</span>${subText}`;
+        }
+
         function updateRaceTabsUI() {
             const tabs = domRefs.raceTabs.children;
             for (let idx = 0; idx < tabs.length; idx++) {
@@ -1030,6 +1086,7 @@
                     el.value = mergedInfo[field];
                 }
             }
+            updateStyleStatsUI(currentRaceObj);
         }
 
         function updateMarkSelectorUI() {
