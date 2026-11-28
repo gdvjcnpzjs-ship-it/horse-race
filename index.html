@@ -539,16 +539,7 @@
         <div class="panel">
             <div class="panel-title">
                 <span>[3] SELECT HORSES</span>
-                <span style="font-size:0.6rem; color:var(--dim-green);">枠番タップまたは右隣5択・脚質選択</span>
-            </div>
-            
-            <!-- マーク選択パレット -->
-            <div class="mark-selector" id="markSelector">
-                <div class="mark-select-btn active" data-mark="KOHO" onclick="setMark('KOHO')">候補</div>
-                <div class="mark-select-btn" data-mark="JIKU" onclick="setMark('JIKU')">軸</div>
-                <div class="mark-select-btn" data-mark="HIMO" onclick="setMark('HIMO')">ヒモ</div>
-                <div class="mark-select-btn" data-mark="OANA" onclick="setMark('OANA')">大穴</div>
-                <div class="mark-select-btn" data-mark="EXCLUDE" onclick="setMark('EXCLUDE')">消</div>
+                <span style="font-size:0.6rem; color:var(--dim-green);">枠番右の候補〜消・脚質を選択</span>
             </div>
 
             <div class="horse-grid" id="horseGrid"></div>
@@ -1042,6 +1033,7 @@
         }
 
         function updateMarkSelectorUI() {
+            if (!domRefs.markButtons) return;
             for (let i = 0; i < domRefs.markButtons.length; i++) {
                 const btn = domRefs.markButtons[i];
                 btn.classList.toggle('active', btn.getAttribute('data-mark') === state.selectedMark);
